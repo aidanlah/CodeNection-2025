@@ -46,7 +46,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
               case 'map':
                 return 'location-outline';
               case 'notification':
-                return 'chatbubble-outline';
+                return 'notifications-outline';
               case 'profile':
                 return 'person-outline';
               default:

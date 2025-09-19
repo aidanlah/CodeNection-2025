@@ -1,4 +1,6 @@
 
+import Button from "@/components/button";
+import { router } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function profilePage() {
@@ -7,6 +9,9 @@ export default function profilePage() {
       <Text className="text-xl font-bold text-blue-500">
         Welcome to profile page!
       </Text>
+    <View className="m-6">
+      <Button title="Log out" variant="secondary" onPress={() => router.push("/sign-up")}/>
+      </View>
     </View>
   );
 }

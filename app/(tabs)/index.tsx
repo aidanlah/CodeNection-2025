@@ -7,7 +7,7 @@ import Button from "@/components/button";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function App() {
+export default function HomeTab() {
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
   const toggleTheme = () => {
@@ -16,10 +16,7 @@ export default function App() {
     colorScheme.set(newTheme);
   };
 
-  const handlePress = () => {
-    // router.push('/(tabs)/sos'),
-    console.log("hello");
-  };
+  
 
   const handleBuddyWalk = () => {
     console.log("BUDDY WALK pressed");
@@ -32,9 +29,7 @@ export default function App() {
     >
       <SOSButton
         buttonImage={require("@/assets/images/sos.png")}
-        onPress={() => {
-          handlePress;
-        }}
+        
       />
 
       <View className="flex flex-col gap-2">

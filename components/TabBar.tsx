@@ -21,7 +21,7 @@ const TabBar: React.FC<TabBarProps> = ({
   const tabs: TabItem[] = [
     { id: 'home', icon: 'home' },
     { id: 'location', icon: 'location-outline' },
-    { id: 'chat', icon: 'chatbubble-outline' },
+    { id: 'chat', icon: 'notifications-outline' },
     { id: 'profile', icon: 'person-outline' },
   ];
 

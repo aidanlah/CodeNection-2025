@@ -10,6 +10,9 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+const MainLayout = () => {
+ 
+}
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -17,8 +20,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="buddyUp" options={{ presentation: 'modal', title: 'Buddy Walk' }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="buddyUp" options={{ presentation: 'modal', title: 'Buddy Walk' }} /> */}
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
