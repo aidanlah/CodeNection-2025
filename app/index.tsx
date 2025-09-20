@@ -14,6 +14,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+// Add Firebase imports
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '@/firebase.config';
+
 
 interface InputFieldProps {
   label: string;
@@ -107,10 +111,39 @@ const SignInPage: React.FC = () => {
 
     setLoading(true);
     try {
+      // Auth with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       
+      Alert.alert('User signed in successfully: ', user.email ?? '')
+      
+      // Only navs if auth succeeds
       router.replace('/(tabs)');
     } catch (error: any) {
-      Alert.alert('Sign In Failed', error.message);
+      // Alert.alert('Sign In Failed', error.message);
+
+      let errorMessage = 'Sign In Failed. Please try again.';
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Incorrect password.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
+      Alert.alert(errorMessage);
+
     } finally {
       setLoading(false);
     }
@@ -123,12 +156,29 @@ const SignInPage: React.FC = () => {
     }
 
     try {
+      // Sending password reset email
+      await sendPasswordResetEmail(auth, email);
       Alert.alert(
         'Password Reset',
         'A password reset email has been sent to your email address'
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      console.error('Password reset error:', error);
+      
+      let errorMessage = 'Failed to send password reset email.';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
+      
+      Alert.alert('Error', errorMessage);
     }
   };
 

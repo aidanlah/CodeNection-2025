@@ -13,6 +13,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/firebase.config';
+
 
 interface InputFieldProps {
   label: string;
@@ -132,6 +135,14 @@ const SignUpPage: React.FC = () => {
 
     setLoading(true);
     try {
+      // Creating user with Firebase auth
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      // Update the user's display name
+      await updateProfile(user, {
+        displayName: formData.fullName
+      });
       Alert.alert(
         "Account Created",
         "Your account has been created successfully!",
@@ -143,19 +154,23 @@ const SignUpPage: React.FC = () => {
         ]
       );
     } catch (error: any) {
-      let errorMessage = error.message;
-
-      // Handle specific Firebase errors
-      if (error.message.includes("email-already-in-use")) {
-        errorMessage =
-          "This email address is already registered. Please use a different email or try signing in.";
-      } else if (error.message.includes("weak-password")) {
-        errorMessage =
-          "Password is too weak. Please choose a stronger password.";
-      } else if (error.message.includes("invalid-email")) {
-        errorMessage = "Invalid email address. Please enter a valid email.";
+      console.error('Sign up error:', error);
+      
+      let errorMessage = 'Account creation failed. Please try again.';
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'An account with this email already exists.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Password should be at least 6 characters.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
       }
-
       Alert.alert("Sign Up Failed", errorMessage);
     } finally {
       setLoading(false);
