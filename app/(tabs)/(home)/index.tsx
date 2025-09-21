@@ -14,7 +14,7 @@ export default function HomeTab() {
         <Button title="BUDDY WALK" onPress={() => router.push("/buddyUp")} />
         <Button
           title="HAZARD REPORT"
-          onPress={() => console.log("HAZARD REPORT pressed")}
+          onPress={() => router.push("./hazardReport")}
         />
       </View>
     </SafeAreaView>

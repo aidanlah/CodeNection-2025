@@ -1,8 +1,9 @@
-import { StyleSheet, View, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Alert, ActivityIndicator, TouchableOpacity, Text } from "react-native";
 import React, { useState } from 'react';
 import MapView, { Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 // Zoom level (smaller = more zoomed in)
 const 
@@ -19,6 +20,20 @@ export default function mapPage() {
     longitude: 101.6419,
     latitudeDelta: LAT_ZOOM,
     longitudeDelta: LONG_ZOOM,
+  };
+
+  const handleReportHazard = () => {
+    if (region) {
+      router.push({
+        pathname: './hazardReport',
+        params: {
+          latitude: region.latitude.toString(),
+          longitude: region.longitude.toString(),
+        },
+      });
+    } else {
+      router.push('./hazardReport');
+    }
   };
 
   // Check location permission every time the screen is focused
@@ -171,6 +186,14 @@ export default function mapPage() {
         showsMyLocationButton={true}
         followsUserLocation={true}
       />
+
+      {/* Button */}
+      <TouchableOpacity
+        style={styles.reportButton}
+        onPress={handleReportHazard}
+      >
+        <Text style={styles.reportButtonText}>Report Hazard</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -186,5 +209,24 @@ const styles = StyleSheet.create({
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  reportButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#ff6b6b',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  reportButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
