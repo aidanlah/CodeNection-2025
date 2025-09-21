@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { Link, router } from "expo-router";
 // Add Firebase imports
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/firebase.config';
-
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { auth } from "@/firebase.config";
+import { PublicRoute } from "@/components/publicRoute";
 
 interface InputFieldProps {
   label: string;
@@ -25,7 +28,7 @@ interface InputFieldProps {
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address';
+  keyboardType?: "default" | "email-address";
   iconName: keyof typeof Ionicons.glyphMap;
   error?: string;
 }
@@ -36,7 +39,7 @@ const InputField: React.FC<InputFieldProps> = ({
   value,
   onChangeText,
   secureTextEntry = false,
-  keyboardType = 'default',
+  keyboardType = "default",
   iconName,
   error,
 }) => {
@@ -44,11 +47,19 @@ const InputField: React.FC<InputFieldProps> = ({
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-700 font-semibold mb-2 text-base">{label}</Text>
-      <View className={`flex-row items-center bg-white rounded-xl border px-4 py-4 ${
-        error ? 'border-red-300' : 'border-gray-200'
-      }`}>
-        <Ionicons name={iconName} size={20} color={error ? '#EF4444' : '#6B7280'} />
+      <Text className="text-gray-700 font-semibold mb-2 text-base">
+        {label}
+      </Text>
+      <View
+        className={`flex-row items-center bg-white rounded-xl border px-4 py-4 ${
+          error ? "border-red-300" : "border-gray-200"
+        }`}
+      >
+        <Ionicons
+          name={iconName}
+          size={20}
+          color={error ? "#EF4444" : "#6B7280"}
+        />
         <TextInput
           className="flex-1 ml-3 text-gray-800 text-base"
           placeholder={placeholder}
@@ -66,25 +77,25 @@ const InputField: React.FC<InputFieldProps> = ({
             className="p-1"
           >
             <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
+              name={showPassword ? "eye-off" : "eye"}
               size={20}
               color="#6B7280"
             />
           </TouchableOpacity>
         )}
       </View>
-      {error && (
-        <Text className="text-red-500 text-sm mt-1 ml-1">{error}</Text>
-      )}
+      {error && <Text className="text-red-500 text-sm mt-1 ml-1">{error}</Text>}
     </View>
   );
 };
 
 const SignInPage: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -92,15 +103,15 @@ const SignInPage: React.FC = () => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!emailRegex.test(email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     // Password validation
     if (!password.trim()) {
-      newErrors.password = 'Password is required';
-    } 
+      newErrors.password = "Password is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -112,38 +123,44 @@ const SignInPage: React.FC = () => {
     setLoading(true);
     try {
       // Auth with Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
-      
-      Alert.alert('User signed in successfully: ', user.email ?? '')
-      
-      // Only navs if auth succeeds
-      router.replace('/(tabs)');
-    } catch (error: any) {
-      // Alert.alert('Sign In Failed', error.message);
 
-      let errorMessage = 'Sign In Failed. Please try again.';
+      Alert.alert("User signed in successfully: ", user.email ?? "");
+
+    } catch (error: any) {
+
+      let errorMessage = "Sign In Failed. Please try again.";
       switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email address.';
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email address.";
           break;
-        case 'auth/wrong-password':
-          errorMessage = 'Incorrect password.';
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password.";
           break;
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address.';
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address.";
           break;
-        case 'auth/user-disabled':
-          errorMessage = 'This account has been disabled.';
+          case "auth/invalid-credential":
+          errorMessage = "Invalid email or password.";
           break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Too many failed attempts. Please try again later.';
+        case "auth/user-disabled":
+          errorMessage = "This account has been disabled.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many failed attempts. Please try again later.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "Opps, seems there's a network issue";
           break;
         default:
           errorMessage = error.message || errorMessage;
       }
-      Alert.alert(errorMessage);
-
+      Alert.alert('Sign In Failed', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -151,7 +168,7 @@ const SignInPage: React.FC = () => {
 
   const handleForgotPassword = async (): Promise<void> => {
     if (!email.trim()) {
-      Alert.alert('Email Required', 'Please enter your email address first');
+      Alert.alert("Email Required", "Please enter your email address first");
       return;
     }
 
@@ -159,43 +176,48 @@ const SignInPage: React.FC = () => {
       // Sending password reset email
       await sendPasswordResetEmail(auth, email);
       Alert.alert(
-        'Password Reset',
-        'A password reset email has been sent to your email address'
+        "Password Reset",
+        "A password reset email has been sent to your email address"
       );
     } catch (error: any) {
-      console.error('Password reset error:', error);
-      
-      let errorMessage = 'Failed to send password reset email.';
-      
+      console.error("Password reset error:", error);
+
+      let errorMessage = "Failed to send password reset email.";
+
       switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email address.';
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email address.";
           break;
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address.';
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address.";
           break;
         default:
           errorMessage = error.message || errorMessage;
       }
-      
-      Alert.alert('Error', errorMessage);
+
+      Alert.alert("Error", errorMessage);
     }
   };
 
-  const navigateToSignUp = (): void => {
-    router.push('/sign-up');
-  };
+ 
 
   return (
+    <PublicRoute>
     <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-6"
+          showsVerticalScrollIndicator={false}
+        >
           <View className="items-center py-8 mt-8">
             <View className="">
-              <Image  className="w-64 h-64" source={require('@/assets/images/guardu.png')}/>
+              <Image
+                className="w-64 h-64"
+                source={require("@/assets/images/guardu.png")}
+              />
             </View>
             <Text className="text-3xl font-bold text-gray-900 mb-2 mt-6">
               Welcome Back
@@ -237,7 +259,7 @@ const SignInPage: React.FC = () => {
               onPress={handleSignIn}
               disabled={loading}
               className={`py-4 rounded-xl ${
-                loading ? 'bg-gray-400' : 'bg-green-500 active:scale-98'
+                loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
               }`}
               activeOpacity={0.8}
             >
@@ -253,17 +275,19 @@ const SignInPage: React.FC = () => {
 
           <View className="flex-row justify-center items-center mb-8">
             <Text className="text-gray-600 text-base">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
             </Text>
-            <TouchableOpacity onPress={navigateToSignUp} activeOpacity={0.7}>
+            
+            <Link href={"/sign-up"}>
               <Text className="text-green-600 font-semibold text-base">
                 Sign Up
               </Text>
-            </TouchableOpacity>
+            </Link>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </PublicRoute>
   );
 };
 

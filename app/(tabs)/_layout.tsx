@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ProtectedRoute } from '@/components/protectedRoute';
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const handleSOSPress = (): void => {
@@ -41,7 +42,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           const getIconName = (routeName: string): keyof typeof Ionicons.glyphMap => {
             switch (routeName) {
               case 'index':
-              case 'home':
+              case '(home)':
                 return 'home';
               case 'map':
                 return 'location-outline';
@@ -88,6 +89,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 export default function TabsLayout() {
   return (
+    <ProtectedRoute>
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
@@ -95,7 +97,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           title: 'Home',
           tabBarLabel: 'Home',
@@ -117,8 +119,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="notification"
         options={{
-          title: 'Chat',
-          tabBarLabel: 'Chat',
+          title: 'Notification',
+          tabBarLabel: 'Notification',
         }}
       />
       <Tabs.Screen
@@ -129,52 +131,8 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </ProtectedRoute>
   );
 }
 
-{
-  /* <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="notification"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-    </Tabs> */
-}
+
