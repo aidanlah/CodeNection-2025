@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/firebase.config';
+import { PublicRoute } from "@/components/publicRoute";
 
 
 interface InputFieldProps {
@@ -98,7 +99,6 @@ const SignUpPage: React.FC = () => {
     password?: string;
     confirmPassword?: string;
   }>({});
-  const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -149,7 +149,7 @@ const SignUpPage: React.FC = () => {
         [
           {
             text: "OK",
-            onPress: () => router.replace("/(tabs)"),
+            onPress: () => {}
           },
         ]
       );
@@ -178,12 +178,10 @@ const SignUpPage: React.FC = () => {
   };
 
   const navigateToSignIn = (): void => {
-    router.push("/");
+    router.push({pathname: '/sign-in'});
   };
 
-  const handleGoBack = (): void => {
-    router.push("/");
-  };
+ 
 
   const updateFormData = (
     field: keyof typeof formData,
@@ -196,6 +194,7 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
+    <PublicRoute>
     <SafeAreaView className="flex-1 bg-gray-50">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -205,12 +204,7 @@ const SignUpPage: React.FC = () => {
           className="flex-1 px-6"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-row items-center py-4">
-            <TouchableOpacity onPress={handleGoBack} className="mr-4">
-              <Ionicons name="arrow-back" size={24} color="#374151" />
-            </TouchableOpacity>
-            <Text className="text-xl font-bold text-gray-900">Sign in</Text>
-          </View>
+          
 
           <View className="items-center py-6">
             <View className="bg-green-500 p-4 rounded-full mb-4">
@@ -295,6 +289,7 @@ const SignUpPage: React.FC = () => {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </PublicRoute>
   );
 };
 
