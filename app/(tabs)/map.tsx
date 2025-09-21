@@ -1,7 +1,13 @@
 import { StyleSheet, View, Alert, ActivityIndicator } from "react-native";
-import React, {useState, useEffect} from 'react';
+import React, { useState } from 'react';
 import MapView, { Region } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { useFocusEffect } from '@react-navigation/native';
+
+// Zoom level (smaller = more zoomed in)
+const 
+  LAT_ZOOM = 0.01,
+  LONG_ZOOM = 0.01;
 
 export default function mapPage() {
   const [region, setRegion] = useState<Region | null>(null);
@@ -11,13 +17,85 @@ export default function mapPage() {
   const fallbackRegion: Region = {
     latitude: 2.9278,
     longitude: 101.6419,
-    latitudeDelta: 0.01, // Zoom level (smaller = more zoomed in)
-    longitudeDelta: 0.01, // Zoom level (smaller = more zoomed in)
+    latitudeDelta: LAT_ZOOM,
+    longitudeDelta: LONG_ZOOM,
   };
 
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
+  // Check location permission every time the screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      checkLocationPermissionAndGetLocation();
+    }, [])
+  );
+
+  const checkLocationPermissionAndGetLocation = async () => {
+    setLoading(true);
+    
+    try {
+      // Check current permission status
+      const { status } = await Location.getForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        // Permission not granted, prompt user
+        Alert.alert(
+          'Location Access Required',
+          'GuardU needs access to your location to show nearby safety information and your current position on the map.',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              },
+              style: 'cancel',
+            },
+            {
+              text: 'Allow Location',
+              onPress: async () => {
+                await requestLocationPermission();
+              },
+            },
+          ]
+        );
+      } else {
+        // Permission already granted, get location
+        await getCurrentLocation();
+      }
+    } catch (error) {
+      console.error('Error checking location permission:', error);
+      setRegion(fallbackRegion);
+      setLoading(false);
+    }
+  };
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status === 'granted') {
+        await getCurrentLocation();
+      } else {
+        Alert.alert(
+          'Location Permission Denied',
+          'Without location access, we\'ll show the default map view. You can enable location access in your device settings.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+      setRegion(fallbackRegion);
+      setLoading(false);
+    }
+  };
+
 
   const getCurrentLocation = async () => {
     try {
@@ -50,8 +128,8 @@ export default function mapPage() {
       const currentRegion: Region = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+        latitudeDelta: LAT_ZOOM,
+        longitudeDelta: LONG_ZOOM,
       };
 
       setRegion(currentRegion);

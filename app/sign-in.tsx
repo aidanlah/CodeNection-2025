@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-// Add Firebase imports
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
