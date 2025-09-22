@@ -18,8 +18,9 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth } from "@/firebase.config";
+import { auth, db } from "@/firebase.config";
 import { PublicRoute } from "@/components/publicRoute";
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 interface InputFieldProps {
   label: string;
@@ -31,6 +32,27 @@ interface InputFieldProps {
   iconName: keyof typeof Ionicons.glyphMap;
   error?: string;
 }
+
+const updateLastLoginTime = async (userId: string) => {
+  try {
+    console.log('Attempting to update last login for user:', userId);
+    
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      lastLoginAt: serverTimestamp(),
+    });
+    console.log(userId)
+    console.log('Last login time updated successfully');
+  } catch (error: any) {
+    console.error('Error updating last login time:', error);
+    
+    if (error.code === 'permission-denied') {
+      console.log('Permission denied - check if user document exists with correct ID');
+    } else if (error.code === 'not-found') {
+      console.log('User document not found - may need to create profile');
+    }
+  }
+};
 
 const InputField: React.FC<InputFieldProps> = ({
   label,
@@ -129,9 +151,14 @@ const SignInPage: React.FC = () => {
       );
       const user = userCredential.user;
 
-      Alert.alert("User signed in successfully: ", user.email ?? "");
+      // Update last login time
+      await updateLastLoginTime(user.uid);
+
+      // Navigate to main app
+      // router.replace('./(tabs)');
 
     } catch (error: any) {
+      console.error('Sign in error:', error);
 
       let errorMessage = "Sign In Failed. Please try again.";
       switch (error.code) {
@@ -154,7 +181,7 @@ const SignInPage: React.FC = () => {
           errorMessage = "Too many failed attempts. Please try again later.";
           break;
         case "auth/network-request-failed":
-          errorMessage = "Opps, seems there's a network issue";
+          errorMessage = "Network issue. Please check your connection.";
           break;
         default:
           errorMessage = error.message || errorMessage;
@@ -197,8 +224,6 @@ const SignInPage: React.FC = () => {
       Alert.alert("Error", errorMessage);
     }
   };
-
- 
 
   return (
     <PublicRoute>

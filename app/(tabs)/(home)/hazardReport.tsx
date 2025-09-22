@@ -13,18 +13,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { auth, db } from '@/firebase.config';
 
 interface HazardReport {
-  location: {
-    latitude: number;
-    longitude: number;
-  };
+  location: GeoPoint;
   description: string;
   hazardType: string;
   reportedBy: string;
   timestamp: any;
+  severity: string;
 }
 
 const HAZARD_TYPES = [
@@ -35,10 +33,17 @@ const HAZARD_TYPES = [
   'Other'
 ];
 
+const SEVERITY_LEVELS = [
+  { value: 'low', label: 'Low', color: '#10B981', description: 'Minor concern' },
+  { value: 'moderate', label: 'Moderate', color: '#F59E0B', description: 'Needs attention' },
+  { value: 'critical', label: 'Critical', color: '#EF4444', description: 'Immediate action required' }
+];
+
 export default function HazardReportPage() {
   const params = useLocalSearchParams();
   const [description, setDescription] = useState('');
   const [selectedHazardType, setSelectedHazardType] = useState('');
+  const [selectedSeverity, setSelectedSeverity] = useState('');
   const [markerLocation, setMarkerLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,8 +125,23 @@ export default function HazardReportPage() {
       return;
     }
 
+    if (!selectedSeverity) {
+      Alert.alert('Error', 'Please select a severity level');
+      return;
+    }
+
     if (!description.trim()) {
       Alert.alert('Error', 'Please provide a description');
+      return;
+    }
+
+    if (description.trim().length < 10) {
+      Alert.alert('Error', 'Description must be at least 10 characters long');
+      return;
+    }
+
+    if (description.trim().length > 1000) {
+      Alert.alert('Error', 'Description must be less than 1000 characters');
       return;
     }
 
@@ -133,13 +153,18 @@ export default function HazardReportPage() {
     setSubmitting(true);
 
     try {
+      const geoPoint = new GeoPoint(markerLocation.latitude, markerLocation.longitude);
+
       const hazardReport: HazardReport = {
-        location: markerLocation,
+        location: geoPoint,
         description: description.trim(),
         hazardType: selectedHazardType,
         reportedBy: auth.currentUser.uid,
         timestamp: serverTimestamp(),
+        severity: selectedSeverity,
       };
+
+      console.log('Submitting hazard report:', hazardReport);
 
       await addDoc(collection(db, 'hazardReports'), hazardReport);
 
@@ -153,9 +178,20 @@ export default function HazardReportPage() {
           },
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting report:', error);
-      Alert.alert('Error', 'Failed to submit report. Please try again.');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'Failed to submit report. Please try again.';
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = 'Permission denied. Please check your login status and try again.';
+      } else if (error.code === 'invalid-argument') {
+        errorMessage = 'Invalid data provided. Please check all fields and try again.';
+      }
+      
+      Alert.alert('Error', errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -215,16 +251,56 @@ export default function HazardReportPage() {
           ))}
         </View>
 
+        <Text style={styles.subtitle}>Severity Level:</Text>
+        <View style={styles.severityContainer}>
+          {SEVERITY_LEVELS.map((severity) => (
+            <TouchableOpacity
+              key={severity.value}
+              style={[
+                styles.severityButton,
+                selectedSeverity === severity.value && {
+                  backgroundColor: severity.color,
+                  borderColor: severity.color,
+                },
+              ]}
+              onPress={() => setSelectedSeverity(severity.value)}
+            >
+              <View style={styles.severityContent}>
+                <Text
+                  style={[
+                    styles.severityLabel,
+                    selectedSeverity === severity.value && styles.selectedSeverityText,
+                  ]}
+                >
+                  {severity.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.severityDescription,
+                    selectedSeverity === severity.value && styles.selectedSeverityText,
+                  ]}
+                >
+                  {severity.description}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <Text style={styles.subtitle}>Description:</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="Describe the hazard in detail..."
+          placeholder="Describe the hazard in detail (minimum 10 characters)..."
           value={description}
           onChangeText={setDescription}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
+          maxLength={1000}
         />
+        <Text style={styles.characterCount}>
+          {description.length}/1000 characters
+        </Text>
 
         <TouchableOpacity
           style={[styles.submitButton, submitting && styles.disabledButton]}
@@ -308,6 +384,33 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
+  severityContainer: {
+    gap: 10,
+    marginBottom: 15,
+  },
+  severityButton: {
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    backgroundColor: 'white',
+  },
+  severityContent: {
+    alignItems: 'center',
+  },
+  severityLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  severityDescription: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  selectedSeverityText: {
+    color: 'white',
+  },
   textInput: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -315,7 +418,13 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     minHeight: 100,
-    marginBottom: 20,
+    marginBottom: 5,
+  },
+  characterCount: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'right',
+    marginBottom: 15,
   },
   submitButton: {
     backgroundColor: '#b7ccf6ff',

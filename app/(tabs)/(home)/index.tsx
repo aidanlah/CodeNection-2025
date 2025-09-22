@@ -11,7 +11,10 @@ export default function HomeTab() {
       <SOSButton buttonImage={require("@/assets/images/sos.png")} />
 
       <View className="flex flex-col gap-2">
-        <Button title="BUDDY WALK" onPress={() => router.push("/buddyUp")} />
+        <Button
+          title="BUDDY WALK"
+          onPress={() => router.push("/buddyUp")}
+        />
         <Button
           title="HAZARD REPORT"
           onPress={() => router.push("./hazardReport")}
