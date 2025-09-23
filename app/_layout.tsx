@@ -19,7 +19,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <AuthProvider>
+        {/* <AuthProvider> */}
           <Stack
             screenOptions={{
               headerShown: false,
@@ -27,6 +27,7 @@ export default function RootLayout() {
               animation: "slide_from_right",
             }}
           >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
               name="sign-in"
               options={{ headerShown: false, animation: "slide_from_left" }}
@@ -35,11 +36,11 @@ export default function RootLayout() {
               name="sign-up"
               options={{ headerShown: false, animation: "slide_from_right" }}
             />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
           </Stack>
 
           <StatusBar style="auto" />
-        </AuthProvider>
+        {/* </AuthProvider> */}
       </ThemeProvider>
     </SafeAreaProvider>
   );
