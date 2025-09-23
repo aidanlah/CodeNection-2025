@@ -5,7 +5,6 @@ import { getFirestore } from "firebase/firestore";
 // Note: Analytics may not work properly in React Native, so we'll omit it for now
 // import { getAnalytics } from "firebase/analytics";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC2Am4RLNpn3t5sHoM84luhy2TiVHsZqzg",
   authDomain: "guardu-umonash.firebaseapp.com",
