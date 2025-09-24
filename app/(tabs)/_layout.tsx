@@ -1,13 +1,13 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { ProtectedRoute } from '@/components/protectedRoute';
+import React from "react";
+import { Tabs } from "expo-router";
+import { View, TouchableOpacity, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { ProtectedRoute } from "@/components/protectedRoute";
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const handleSOSPress = (): void => {
-    console.log('SOS button pressed from tab bar');
-    navigation.navigate('sos'); 
+    console.log("SOS button pressed from tab bar");
+    navigation.navigate("sos");
   };
 
   return (
@@ -15,11 +15,12 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
       <View className="bg-green-500 flex-row items-center px-4 py-2 pb-6">
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
-          const label = options.tabBarLabel !== undefined 
-            ? options.tabBarLabel 
-            : options.title !== undefined 
-            ? options.title 
-            : route.name;
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+                ? options.title
+                : route.name;
 
           const isFocused = state.index === index;
 
@@ -29,7 +30,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
           const onPress = () => {
             const event = navigation.emit({
-              type: 'tabPress',
+              type: "tabPress",
               target: route.key,
               canPreventDefault: true,
             });
@@ -39,19 +40,21 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
             }
           };
 
-          const getIconName = (routeName: string): keyof typeof Ionicons.glyphMap => {
+          const getIconName = (
+            routeName: string
+          ): keyof typeof Ionicons.glyphMap => {
             switch (routeName) {
-              case 'index':
-              case '(home)':
-                return 'home';
-              case 'map':
-                return 'location-outline';
-              case 'notification':
-                return 'notifications-outline';
-              case '(profile)':
-                return 'person-outline';
+              case "index":
+              case "(home)":
+                return "home";
+              case "map":
+                return "location-outline";
+              case "notification":
+                return "notifications-outline";
+              case "(profile)":
+                return "person-outline";
               default:
-                return 'ellipse-outline';
+                return "ellipse-outline";
             }
           };
 
@@ -65,7 +68,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
               <Ionicons
                 name={getIconName(route.name)}
                 size={24}
-                color={isFocused ? '#ffffff' : 'rgba(255, 255, 255, 0.7)'}
+                color={isFocused ? "#ffffff" : "rgba(255, 255, 255, 0.7)"}
               />
             </TouchableOpacity>
           );
@@ -89,50 +92,48 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 export default function TabsLayout() {
   return (
-    // <ProtectedRoute>
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false, 
-      }}
-    >
-      <Tabs.Screen
-        name="(home)"
-        options={{
-          title: 'Home',
-          tabBarLabel: 'Home',
+    <ProtectedRoute>
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
         }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Location',
-          tabBarLabel: 'Location',
-        }}
-      />
-      <Tabs.Screen
-        name="sos"
-        options={{
-          title: 'SOS',
-        }}
-      />
-      <Tabs.Screen
-        name="notification"
-        options={{
-          title: 'Notification',
-          tabBarLabel: 'Notification',
-        }}
-      />
-      <Tabs.Screen
-        name="(profile)"
-        options={{
-          title: 'Profile',
-          tabBarLabel: 'Profile',
-        }}
-      />
-    </Tabs>
-    // </ProtectedRoute>
+      >
+        <Tabs.Screen
+          name="(home)"
+          options={{
+            title: "Home",
+            tabBarLabel: "Home",
+          }}
+        />
+        <Tabs.Screen
+          name="map"
+          options={{
+            title: "Location",
+            tabBarLabel: "Location",
+          }}
+        />
+        <Tabs.Screen
+          name="sos"
+          options={{
+            title: "SOS",
+          }}
+        />
+        <Tabs.Screen
+          name="notification"
+          options={{
+            title: "Notification",
+            tabBarLabel: "Notification",
+          }}
+        />
+        <Tabs.Screen
+          name="(profile)"
+          options={{
+            title: "Profile",
+            tabBarLabel: "Profile",
+          }}
+        />
+      </Tabs>
+    </ProtectedRoute>
   );
 }
-
-

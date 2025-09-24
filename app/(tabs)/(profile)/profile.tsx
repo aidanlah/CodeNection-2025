@@ -1,4 +1,5 @@
 import { auth } from "@/firebase.config";
+import SecureStorageService from "@/services/secureStorage";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from "firebase/auth";
@@ -30,6 +31,7 @@ export default function ProfilePage() {
 
   const handleLogout = async (): Promise<void> => {
     try {
+      await SecureStorageService.clearAll();
       await signOut(auth);
       console.log("user logged out");
     } catch (error: any) {
@@ -73,7 +75,7 @@ export default function ProfilePage() {
           Personal Profile
         </Text>
         <TouchableOpacity 
-          // onPress={handleLogout}
+          onPress={handleLogout}
           className="absolute top-6 right-4 bg-red-500 px-3 py-1 rounded"
           activeOpacity={0.8}
         >

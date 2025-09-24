@@ -12,6 +12,7 @@ class SecureStorageService {
   // Store auth token securely
   static async storeAuthToken(token: string): Promise<void> {
     try {
+      console.log('storing auth token')
       await SecureStore.setItemAsync(this.KEYS.AUTH_TOKEN, token);
     } catch (error) {
       console.error('Error storing auth token:', error);
@@ -22,6 +23,7 @@ class SecureStorageService {
   // Get auth token
   static async getAuthToken(): Promise<string | null> {
     try {
+      console.log('getting auth token')
       return await SecureStore.getItemAsync(this.KEYS.AUTH_TOKEN);
     } catch (error) {
       console.error('Error getting auth token:', error);
@@ -42,6 +44,7 @@ class SecureStorageService {
   // Get user data
   static async getUserData(): Promise<any | null> {
     try {
+      console.log('getting user data')
       const data = await SecureStore.getItemAsync(this.KEYS.USER_DATA);
       return data ? JSON.parse(data) : null;
     } catch (error) {
@@ -73,7 +76,9 @@ class SecureStorageService {
   // Clear all secure data (on logout)
   static async clearAll(): Promise<void> {
     try {
+      console.log('clearing secure storge')
       await Promise.all([
+        
         SecureStore.deleteItemAsync(this.KEYS.AUTH_TOKEN),
         SecureStore.deleteItemAsync(this.KEYS.USER_DATA),
         SecureStore.deleteItemAsync(this.KEYS.REFRESH_TOKEN),

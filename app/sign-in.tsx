@@ -17,10 +17,13 @@ import { Link, router } from "expo-router";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  getIdToken,
 } from "firebase/auth";
 import { auth, db } from "@/firebase.config";
 import { PublicRoute } from "@/components/publicRoute";
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import SecureStorageService from "@/services/secureStorage";
+import { SessionManager } from "@/services/sessionManager";
 
 interface InputFieldProps {
   label: string;
@@ -35,21 +38,23 @@ interface InputFieldProps {
 
 const updateLastLoginTime = async (userId: string) => {
   try {
-    console.log('Attempting to update last login for user:', userId);
-    
-    const userRef = doc(db, 'users', userId);
+    console.log("Attempting to update last login for user:", userId);
+
+    const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       lastLoginAt: serverTimestamp(),
     });
-    console.log(userId)
-    console.log('Last login time updated successfully');
+    console.log(userId);
+    console.log("Last login time updated successfully");
   } catch (error: any) {
-    console.error('Error updating last login time:', error);
-    
-    if (error.code === 'permission-denied') {
-      console.log('Permission denied - check if user document exists with correct ID');
-    } else if (error.code === 'not-found') {
-      console.log('User document not found - may need to create profile');
+    console.error("Error updating last login time:", error);
+
+    if (error.code === "permission-denied") {
+      console.log(
+        "Permission denied - check if user document exists with correct ID"
+      );
+    } else if (error.code === "not-found") {
+      console.log("User document not found - may need to create profile");
     }
   }
 };
@@ -154,8 +159,13 @@ const SignInPage: React.FC = () => {
       // Update last login time
       await updateLastLoginTime(user.uid);
 
+      // Store auth token securely
+      const token = await getIdToken(user);
+      // await SecureStorageService.storeAuthToken(token);
+      await SessionManager.storeSession(user, token)
+      console.log('page: session stored')
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error("Sign in error:", error);
 
       let errorMessage = "Sign In Failed. Please try again.";
       switch (error.code) {
@@ -168,7 +178,7 @@ const SignInPage: React.FC = () => {
         case "auth/invalid-email":
           errorMessage = "Invalid email address.";
           break;
-          case "auth/invalid-credential":
+        case "auth/invalid-credential":
           errorMessage = "Invalid email or password.";
           break;
         case "auth/user-disabled":
@@ -183,7 +193,7 @@ const SignInPage: React.FC = () => {
         default:
           errorMessage = error.message || errorMessage;
       }
-      Alert.alert('Sign In Failed', errorMessage);
+      Alert.alert("Sign In Failed", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -224,90 +234,90 @@ const SignInPage: React.FC = () => {
 
   return (
     <PublicRoute>
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
-          className="flex-1 px-6"
-          showsVerticalScrollIndicator={false}
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
         >
-          <View className="items-center py-8 mt-8">
-            <View className="">
-              <Image
-                className="w-64 h-64"
-                source={require("@/assets/images/guardu.png")}
-              />
+          <ScrollView
+            className="flex-1 px-6"
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="items-center py-8 mt-8">
+              <View className="">
+                <Image
+                  className="w-64 h-64"
+                  source={require("@/assets/images/guardu.png")}
+                />
+              </View>
+              <Text className="text-3xl font-bold text-gray-900 mb-2 mt-6">
+                Welcome Back
+              </Text>
             </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-2 mt-6">
-              Welcome Back
-            </Text>
-          </View>
 
-          <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <InputField
-              label="Email Address"
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              iconName="mail"
-              error={errors.email}
-            />
+            <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+              <InputField
+                label="Email Address"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                iconName="mail"
+                error={errors.email}
+              />
 
-            <InputField
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={true}
-              iconName="lock-closed"
-              error={errors.password}
-            />
+              <InputField
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={true}
+                iconName="lock-closed"
+                error={errors.password}
+              />
 
-            <TouchableOpacity
-              onPress={handleForgotPassword}
-              className="self-end mb-6"
-              activeOpacity={0.7}
-            >
-              <Text className="text-green-600 font-medium">
-                Forgot Password?
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleSignIn}
-              disabled={loading}
-              className={`py-4 rounded-xl ${
-                loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
-              }`}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className="text-white font-bold text-lg text-center">
-                  Sign In
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                className="self-end mb-6"
+                activeOpacity={0.7}
+              >
+                <Text className="text-green-600 font-medium">
+                  Forgot Password?
                 </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+              </TouchableOpacity>
 
-          <View className="flex-row justify-center items-center mb-8">
-            <Text className="text-gray-600 text-base">
-              Don't have an account?{" "}
-            </Text>
-            
-            <Link href={"/sign-up"}>
-              <Text className="text-green-600 font-semibold text-base">
-                Sign Up
+              <TouchableOpacity
+                onPress={handleSignIn}
+                disabled={loading}
+                className={`py-4 rounded-xl ${
+                  loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
+                }`}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white font-bold text-lg text-center">
+                    Sign In
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View className="flex-row justify-center items-center mb-8">
+              <Text className="text-gray-600 text-base">
+                Don't have an account?{" "}
               </Text>
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+              <Link href={"/sign-up"}>
+                <Text className="text-green-600 font-semibold text-base">
+                  Sign Up
+                </Text>
+              </Link>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </PublicRoute>
   );
 };
