@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -35,7 +35,7 @@ const Button: React.FC<ButtonProps> = ({
       return `${baseStyles} bg-white border-2 border-green-500 active:scale-95`;
     }
     
-    return `${baseStyles} bg-green-500 active:scale-95`;
+    return `${baseStyles} bg-green-600 active:scale-95`;
   };
 
   const getTextStyles = (): string => {
@@ -44,7 +44,7 @@ const Button: React.FC<ButtonProps> = ({
     }
     
     if (variant === 'secondary') {
-      return "text-green-500 text-base font-bold tracking-wider";
+      return "text-green-600 text-base font-bold tracking-wider";
     }
     
     return "text-white text-3xl font-medium tracking-wider";

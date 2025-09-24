@@ -1,26 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { PublicRoute } from "@/components/publicRoute";
+import { auth, db } from "@/firebase.config";
+import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 import {
-  View,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
-import { auth, db } from "@/firebase.config";
-import { PublicRoute } from "@/components/publicRoute";
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 interface InputFieldProps {
   label: string;
@@ -117,6 +118,9 @@ const SignInPage: React.FC = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+
+  const { width } = Dimensions.get('window');
+  const imageSize = Math.min(width * 0.6, 200); // Responsive sizing
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -235,19 +239,26 @@ const SignInPage: React.FC = () => {
         <ScrollView
           className="flex-1 px-6"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 50 }}
         >
-          <View className="items-center py-8 mt-8">
-            <View className="">
+          {/* Logo Section - Fixed container with proper spacing */}
+          <View className="items-center py-6 mt-4">
+            <View className="items-center justify-center" style={{ minHeight: imageSize + 40 }}>
               <Image
-                className="w-64 h-64"
                 source={require("@/assets/images/guardu.png")}
+                style={{
+                  width: imageSize,
+                  height: imageSize,
+                }}
+                resizeMode="contain"
               />
             </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-2 mt-6">
-              Welcome Back
+            <Text className="text-3xl font-bold text-gray-700 mb-2 mt-4">
+              WELCOME BACK
             </Text>
           </View>
 
+          {/* Form Section */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
             <InputField
               label="Email Address"
@@ -274,7 +285,7 @@ const SignInPage: React.FC = () => {
               className="self-end mb-6"
               activeOpacity={0.7}
             >
-              <Text className="text-green-600 font-medium">
+              <Text className="text-green-700 font-medium">
                 Forgot Password?
               </Text>
             </TouchableOpacity>
@@ -283,7 +294,7 @@ const SignInPage: React.FC = () => {
               onPress={handleSignIn}
               disabled={loading}
               className={`py-4 rounded-xl ${
-                loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
+                loading ? "bg-gray-400" : "bg-green-600 active:scale-98"
               }`}
               activeOpacity={0.8}
             >
@@ -297,13 +308,14 @@ const SignInPage: React.FC = () => {
             </TouchableOpacity>
           </View>
 
+          {/* Sign Up Link */}
           <View className="flex-row justify-center items-center mb-8">
             <Text className="text-gray-600 text-base">
               Don't have an account?{" "}
             </Text>
             
             <Link href={"/sign-up"}>
-              <Text className="text-green-600 font-semibold text-base">
+              <Text className="text-green-700 font-semibold text-base">
                 Sign Up
               </Text>
             </Link>

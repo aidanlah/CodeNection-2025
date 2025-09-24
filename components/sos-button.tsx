@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, Image, View, Text, ImageSourcePropType } from 'react-native';
+import { Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 
 interface SOSButtonProps {
   onPress?: () => void;
