@@ -154,9 +154,6 @@ const SignInPage: React.FC = () => {
       // Update last login time
       await updateLastLoginTime(user.uid);
 
-      // Navigate to main app
-      // router.replace('./(tabs)');
-
     } catch (error: any) {
       console.error('Sign in error:', error);
 
