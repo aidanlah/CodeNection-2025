@@ -61,9 +61,10 @@ export default function HazardReportPage() {
     initializeLocation();
   }, []);
 
+  // Add this updated initializeLocation function
   const initializeLocation = async () => {
     try {
-      // If coordinates passed from map tab
+      // If coordinates passed from map tab, use them
       if (params.latitude && params.longitude) {
         const lat = parseFloat(params.latitude as string);
         const lng = parseFloat(params.longitude as string);
@@ -81,31 +82,101 @@ export default function HazardReportPage() {
         return;
       }
 
-      // Otherwise get current location
-      const { status } = await Location.getForegroundPermissionsAsync();
+      // Check current location permission status
+      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
       
-      if (status === 'granted') {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
-
-        const currentRegion: Region = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
-
-        setRegion(currentRegion);
+      if (currentStatus !== 'granted') {
+        // Show permission request alert
+        Alert.alert(
+          'Location Access Required',
+          'GuardU needs access to your location to help you report hazards accurately. This helps other students know exactly where the hazard is located.',
+          [
+            {
+              text: 'Use Default Location',
+              style: 'cancel',
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              }
+            },
+            {
+              text: 'Allow Location',
+              onPress: async () => {
+                await requestLocationPermission();
+              }
+            }
+          ]
+        );
       } else {
-        setRegion(fallbackRegion);
+        // Permission already granted, get current location
+        await getCurrentLocation();
       }
       
-      setLoading(false);
     } catch (error) {
-      console.error('Error getting location:', error);
+      console.error('Error initializing location:', error);
       setRegion(fallbackRegion);
       setLoading(false);
+    }
+  };
+
+  // Add these helper functions
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        await getCurrentLocation();
+      } else {
+        Alert.alert(
+          'Location Permission Denied',
+          'You can still report hazards, but you\'ll need to manually select the location on the map. You can enable location access in your device settings later.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+      setRegion(fallbackRegion);
+      setLoading(false);
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const currentRegion: Region = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+
+      setRegion(currentRegion);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error getting current location:', error);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. You can manually select the hazard location on the map.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setRegion(fallbackRegion);
+              setLoading(false);
+            }
+          }
+        ]
+      );
     }
   };
 

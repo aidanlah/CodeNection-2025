@@ -73,12 +73,12 @@ export default function mapPage() {
           'GuardU needs access to your location to show nearby safety information and your current position on the map.',
           [
             {
-              text: 'Cancel',
+              text: 'Use Default Location',
+              style: 'cancel',
               onPress: () => {
                 setRegion(fallbackRegion);
                 setLoading(false);
               },
-              style: 'cancel',
             },
             {
               text: 'Allow Location',
@@ -127,23 +127,6 @@ export default function mapPage() {
 
   const getCurrentLocation = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Location Permission Required',
-          'Please enable location services to show your current location on the map.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setRegion(fallbackRegion);
-                setLoading(false);
-              }
-            }
-          ]
-        );
-        return;
-      }
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
