@@ -130,18 +130,6 @@ export default function VolunteerSignUpForm() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="px-4 py-6 relative" style={{backgroundColor: '#16a34a'}}>
-        <TouchableOpacity 
-          onPress={handleGoBack}
-          className="absolute top-6 left-4"
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-xl font-semibold text-center text-white">
-          Become a Volunteer
-        </Text>
-      </View>
 
       <ScrollView className="flex-1 px-4 py-6">
         {/* Profile Picture Section */}

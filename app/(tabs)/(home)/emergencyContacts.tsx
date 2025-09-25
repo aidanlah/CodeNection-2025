@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import { auth, db } from "@/firebase.config";
@@ -21,6 +21,19 @@ interface EmergencyContact {
 }
 
 export default function EmergencyContactsPage() {
+  // This would be configured in your navigation stack/tabs
+  // Example for Stack Navigator:
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     title: 'Emergency Contacts',
+  //     headerRight: () => (
+  //       <TouchableOpacity onPress={handleAddContact} style={{ marginRight: 15 }}>
+  //         <Ionicons name="add" size={24} color="#16a34a" />
+  //       </TouchableOpacity>
+  //     ),
+  //   });
+  // }, [navigation]);
+
   // Mock emergency contacts - replace with Firebase data
   const [contacts, setContacts] = useState<EmergencyContact[]>([
     {
@@ -49,6 +62,48 @@ export default function EmergencyContactsPage() {
   const handleGoBack = () => {
     console.log("Navigate back to profile page");
     // router.back(); or navigation.goBack();
+  };
+
+  // Check if form has been modified
+  const isFormModified = () => {
+    if (editingContact) {
+      return (
+        formData.name !== editingContact.name ||
+        formData.phone !== editingContact.phone ||
+        formData.relationship !== editingContact.relationship
+      );
+    } else {
+      return formData.name.trim() !== '' || formData.phone.trim() !== '' || formData.relationship.trim() !== '';
+    }
+  };
+
+  // Handle modal close with confirmation
+  const handleCloseModal = () => {
+    if (isFormModified()) {
+      Alert.alert(
+        "Discard Changes?",
+        "You have unsaved changes. Are you sure you want to discard them?",
+        [
+          {
+            text: "Keep Editing",
+            style: "cancel"
+          },
+          {
+            text: "Discard",
+            style: "destructive",
+            onPress: () => {
+              setModalVisible(false);
+              setFormData({ name: '', phone: '', relationship: '' });
+              setEditingContact(null);
+            }
+          }
+        ]
+      );
+    } else {
+      setModalVisible(false);
+      setFormData({ name: '', phone: '', relationship: '' });
+      setEditingContact(null);
+    }
   };
 
   // Open modal for adding new contact
@@ -135,6 +190,8 @@ export default function EmergencyContactsPage() {
       // await saveContactsToFirebase(contacts);
 
       setModalVisible(false);
+      setFormData({ name: '', phone: '', relationship: '' });
+      setEditingContact(null);
       Alert.alert(
         "Success", 
         editingContact ? "Contact updated successfully!" : "Contact added successfully!"
@@ -150,27 +207,6 @@ export default function EmergencyContactsPage() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="px-4 py-6 relative" style={{backgroundColor: '#16a34a'}}>
-        <TouchableOpacity 
-          onPress={handleGoBack}
-          className="absolute top-6 left-4"
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-xl font-semibold text-center text-white">
-          Emergency Contacts
-        </Text>
-        <TouchableOpacity 
-          onPress={handleAddContact}
-          className="absolute top-4 right-4"
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={28} color="white" />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView className="flex-1 px-4 py-6">
         {/* Contacts List */}
         {contacts.length > 0 ? (
@@ -235,20 +271,38 @@ export default function EmergencyContactsPage() {
         )}
       </ScrollView>
 
+      {/* Add Contact Button - Safer Position */}
+      {contacts.length > 0 && (
+        <View className="px-4 pb-6">
+          <TouchableOpacity
+            onPress={handleAddContact}
+            className="flex-row items-center justify-center py-3 px-6 rounded-lg border-2 border-dashed"
+            style={{borderColor: '#16a34a'}}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add-circle-outline" size={20} color="#16a34a" style={{marginRight: 8}} />
+            <Text style={{color: '#16a34a'}} className="font-semibold">
+              Add Another Contact
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Add/Edit Contact Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={handleCloseModal}
       >
         <SafeAreaView className="flex-1 bg-gray-50">
           {/* Modal Header */}
           <View className="px-4 py-6 relative" style={{backgroundColor: '#16a34a'}}>
             <TouchableOpacity 
-              onPress={() => setModalVisible(false)}
-              className="absolute top-6 left-4"
+              onPress={handleCloseModal}
+              className="absolute top-6 left-4 z-10"
               activeOpacity={0.8}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Ionicons name="close" size={24} color="white" />
             </TouchableOpacity>
@@ -257,8 +311,9 @@ export default function EmergencyContactsPage() {
             </Text>
             <TouchableOpacity 
               onPress={handleSaveContact}
-              className="absolute top-6 right-4"
+              className="absolute top-6 right-4 z-10"
               activeOpacity={0.8}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Text className="text-white font-semibold">Save</Text>
             </TouchableOpacity>
@@ -318,8 +373,6 @@ export default function EmergencyContactsPage() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-
-
     </SafeAreaView>
   );
 }
