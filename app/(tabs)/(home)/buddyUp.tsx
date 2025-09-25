@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-} from 'react-native';
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import MapView, { Marker, Region } from "react-native-maps";
+import * as Location from "expo-location";
 interface LocationInputProps {
   label: string;
   placeholder: string;
@@ -28,7 +31,9 @@ const LocationInput: React.FC<LocationInputProps> = ({
 }) => {
   return (
     <View className="mb-6">
-      <Text className="text-gray-700 font-semibold mb-2 text-base">{label}</Text>
+      <Text className="text-gray-700 font-semibold mb-2 text-base">
+        {label}
+      </Text>
       <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-4 py-4 shadow-sm">
         <Ionicons name={iconName} size={20} color="#6B7280" />
         <TextInput
@@ -45,150 +50,203 @@ const LocationInput: React.FC<LocationInputProps> = ({
   );
 };
 
-const JourneyPlannerPage: React.FC = () => {
-  const [startingLocation, setStartingLocation] = useState<string>('');
-  const [destination, setDestination] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const LAT_ZOOM = 0.01,
+  LONG_ZOOM = 0.01;
 
-  const handleGoBack = (): void => {
-    router.back();
+export default function walkWithMePage() {
+  const [startPoint, setStartPoint] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [destination, setDestination] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [region, setRegion] = useState<Region | null>(null);
+
+  const fallbackRegion: Region = {
+    latitude: 2.9278,
+    longitude: 101.6419,
+    latitudeDelta: LAT_ZOOM,
+    longitudeDelta: LONG_ZOOM,
   };
 
-  const handleSwapLocations = (): void => {
-    const temp = startingLocation;
-    setStartingLocation(destination);
-    setDestination(temp);
-  };
-
-  const handleCurrentLocation = (): void => {
-    setStartingLocation('Current Location');
-    Alert.alert('Location', 'Using your current location');
-  };
-
-  const handleStartJourney = async (): Promise<void> => {
-    if (!startingLocation.trim() || !destination.trim()) {
-      Alert.alert('Error', 'Please enter both starting location and destination');
-      return;
-    }
-
-    setIsLoading(true);
-    
+  const checkLocationPermissionAndGetLocation = async () => {
+    setLoading(true);
     try {
-      // Simulate API call or navigation setup
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Location Access Required",
+          "GuardU needs access to your location to show nearby safety information and your current position on the map.",
+          [
+            {
+              text: "Cancel",
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              },
+              style: "cancel",
+            },
+            {
+              text: "Allow Location",
+              onPress: async () => {
+                await requestLocationPermission();
+              },
+            },
+          ]
+        );
+      } else {
+        await getCurrentLocation();
+      }
+    } catch (error) {
+      console.error("Error checking location permission:", error);
+      setRegion(fallbackRegion);
+      setLoading(false);
+    }
+  };
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        await getCurrentLocation();
+      } else {
+        Alert.alert(
+          "Location Permission Denied",
+          "Without location access, we'll show the default map view. You can enable location access in your device settings.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setRegion(fallbackRegion);
+      setLoading(false);
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Location Permission Required",
+          "Please enable location services to show your current location on the map.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setRegion(fallbackRegion);
+                setLoading(false);
+              },
+            },
+          ]
+        );
+        return;
+      }
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      const currentRegion: Region = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: LAT_ZOOM,
+        longitudeDelta: LONG_ZOOM,
+      };
+      setRegion(currentRegion);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error getting location:", error);
       Alert.alert(
-        'Journey Started',
-        `From: ${startingLocation}\nTo: ${destination}`,
+        "Location Error",
+        "Unable to get your current location. Using default location.",
         [
           {
-            text: 'OK',
+            text: "OK",
             onPress: () => {
-              // Navigate to map or tracking screen
-              console.log('Journey started:', { startingLocation, destination });
+              setRegion(fallbackRegion);
+              setLoading(false);
             },
           },
         ]
       );
-    } catch (error) {
-      Alert.alert('Error', 'Failed to start journey. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    checkLocationPermissionAndGetLocation();
+  }, []);
+
+  const handleMapPress = (event: any) => {
+    const { coordinate } = event.nativeEvent;
+
+    if (!startPoint) {
+      setStartPoint(coordinate);
+    } else if (!destination) {
+      setDestination(coordinate);
+    } else {
+      // Reset both points
+      setStartPoint(coordinate);
+      setDestination(null);
+    }
+  };
+
+  if (loading || !region) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#b7ccf6ff" />
+      </View>
+    );
+  }
   return (
-    
-    <View className="flex-1 bg-gray-50">
-      
-       <ScrollView className="flex-1 px-4 py-6">
-        <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <LocationInput
-            label="Starting Location"
-            placeholder="Enter starting point"
-            value={startingLocation}
-            onChangeText={setStartingLocation}
-            iconName="location"
+    <View className="flex-1">
+      <MapView
+        style={styles.map}
+        region={region}
+        onPress={handleMapPress}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        followsUserLocation={true}
+      >
+        {startPoint && (
+          <Marker
+            coordinate={startPoint}
+            title="Start Point"
+            pinColor="green"
           />
+        )}
 
-          <View className="items-center mb-6">
-            <TouchableOpacity
-              onPress={handleSwapLocations}
-              className="bg-gray-100 p-3 rounded-full"
-              activeOpacity={0.7}
-            >
-              <Ionicons name="swap-vertical" size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <LocationInput
-            label="Destination"
-            placeholder="Enter destination"
-            value={destination}
-            onChangeText={setDestination}
-            iconName="flag"
+        {destination && (
+          <Marker
+            coordinate={destination}
+            title="Destination"
+            pinColor="red"
           />
-
-          <TouchableOpacity
-            onPress={handleCurrentLocation}
-            className="flex-row items-center justify-center bg-blue-50 py-3 px-4 rounded-xl mb-6"
-            activeOpacity={0.7}
-          >
-            <Ionicons name="locate" size={20} color="#3B82F6" />
-            <Text className="ml-2 text-blue-600 font-semibold">
-              Use Current Location
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Safety Features
-          </Text>
-          
-          <View className="space-y-3">
-            <View className="flex-row items-center">
-              <Ionicons name="shield-checkmark" size={20} color="#10B981" />
-              <Text className="ml-3 text-gray-700">Real-time location sharing</Text>
-            </View>
-            
-            <View className="flex-row items-center">
-              <Ionicons name="people" size={20} color="#10B981" />
-              <Text className="ml-3 text-gray-700">Buddy tracking enabled</Text>
-            </View>
-            
-            <View className="flex-row items-center">
-              <Ionicons name="warning" size={20} color="#10B981" />
-              <Text className="ml-3 text-gray-700">Hazard alerts on route</Text>
-            </View>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={handleStartJourney}
-          disabled={isLoading || !startingLocation.trim() || !destination.trim()}
-          className={`py-4 px-6 rounded-xl shadow-sm ${
-            isLoading || !startingLocation.trim() || !destination.trim()
-              ? 'bg-gray-400'
-              : 'bg-green-500 active:scale-98'
-          }`}
-          activeOpacity={0.8}
-        >
-          <View className="flex-row items-center justify-center">
-            {isLoading ? (
-              <Ionicons name="refresh" size={20} color="#fff" />
-            ) : (
-              <Ionicons name="navigate" size={20} color="#fff" />
-            )}
-            <Text className="ml-2 text-white font-bold text-lg">
-              {isLoading ? 'Planning Route...' : 'Start Journey'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </ScrollView>
+        )}
+      </MapView>
     </View>
-    
   );
-};
+}
 
-export default JourneyPlannerPage;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
