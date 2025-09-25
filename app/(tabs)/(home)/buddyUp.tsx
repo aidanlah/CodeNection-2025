@@ -8,18 +8,35 @@ import {
   Alert,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
+import {
+  addDoc,
+  collection,
+  GeoPoint,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "@/firebase.config";
 interface LocationInputProps {
   label: string;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
   iconName: keyof typeof Ionicons.glyphMap;
+}
+
+interface BuddyUp {
+  createdAt: any;
+  destination: GeoPoint;
+  startLocation: GeoPoint;
+  hasVolunteer: boolean;
+  status: string;
+  userId: string;
 }
 
 const LocationInput: React.FC<LocationInputProps> = ({
@@ -54,6 +71,10 @@ const LAT_ZOOM = 0.01,
   LONG_ZOOM = 0.01;
 
 export default function walkWithMePage() {
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [startPoint, setStartPoint] = useState<{
     latitude: number;
     longitude: number;
@@ -64,6 +85,8 @@ export default function walkWithMePage() {
   } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [region, setRegion] = useState<Region | null>(null);
+  const [submitBuddyUp, setSubmitBuddyUp] = useState(false);
+  const [submitTrack, setSubmitTrack] = useState(false);
 
   const fallbackRegion: Region = {
     latitude: 2.9278,
@@ -162,6 +185,7 @@ export default function walkWithMePage() {
         latitudeDelta: LAT_ZOOM,
         longitudeDelta: LONG_ZOOM,
       };
+      setLocation(location.coords);
       setRegion(currentRegion);
       setLoading(false);
     } catch (error) {
@@ -200,6 +224,74 @@ export default function walkWithMePage() {
     }
   };
 
+  const useCurrent = () => {
+    setStartPoint(location);
+  };
+
+  const clearMarkers = () => {
+    setStartPoint(null);
+    setDestination(null);
+  };
+
+  const handleBuddyUp = async () => {
+    if (!startPoint) {
+      Alert.alert("Error", "Please pin a start point");
+      return;
+    }
+    if (!destination) {
+      Alert.alert("Error", "Please pin a destination");
+      return;
+    }
+    if (!auth.currentUser) {
+      Alert.alert("Error", "You must be logged in to report a hazard");
+      return;
+    }
+
+    setSubmitBuddyUp(true);
+
+    try {
+      const start = new GeoPoint(startPoint.latitude, startPoint.longitude);
+      const dest = new GeoPoint(destination.latitude, destination.longitude);
+
+      const buddyUp: BuddyUp = {
+        createdAt: serverTimestamp(),
+        destination: dest,
+        startLocation: start,
+        status: "pending",
+        hasVolunteer: false,
+        userId: auth.currentUser.uid,
+      };
+
+      console.log("Submitting buddyup request:", buddyUp);
+      
+      await addDoc(collection(db, "buddyUp"), buddyUp);
+
+      Alert.alert("Request Submitted", "Waiting for volunteer", [
+        {
+          text: "OK",
+          // onPress: () => router.back(),
+        },
+      ]);
+
+    } catch (error: any) {
+
+      console.error("Error submitting request:", error.message);
+      let errorMessage = "Failed to submit request. Please try again.";
+      if (error.code === "permission-denied") {
+        errorMessage =
+          "Permission denied. Please check your login status and try again.";
+      } else if (error.code === "invalid-argument") {
+        errorMessage =
+          "Invalid data provided. Please check all fields and try again.";
+      }
+      Alert.alert("Error", errorMessage);
+
+    } finally {
+
+      setSubmitBuddyUp(false);
+    }
+  };
+
   if (loading || !region) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -208,7 +300,10 @@ export default function walkWithMePage() {
     );
   }
   return (
-    <View className="flex-1">
+    <View className=" relative flex-1 items-center">
+      <View className="p-[15] absolute bg-white z-40 top-[5px] rounded-full justify-center items-center ">
+        <Text className="">Tap on map</Text>
+      </View>
       <MapView
         style={styles.map}
         region={region}
@@ -221,18 +316,66 @@ export default function walkWithMePage() {
           <Marker
             coordinate={startPoint}
             title="Start Point"
-            pinColor="green"
+            pinColor="orange"
           />
         )}
 
         {destination && (
-          <Marker
-            coordinate={destination}
-            title="Destination"
-            pinColor="red"
-          />
+          <Marker coordinate={destination} title="Destination" pinColor="red" />
         )}
       </MapView>
+      <View className="w-full h-1/3 absolute bottom-0 bg-white rounded-t-[50px] flex-1 items-center justify-center">
+        <View className="flex flex-row gap-2">
+          <TouchableOpacity
+            className="w-32 border-2 rounded-[10px] p-[15] border-[#FFD66B] items-center"
+            onPress={useCurrent}
+          >
+            <Text className="text-gray-600 text-base">My location</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="w-32 border-2 rounded-[10px] p-[15] border-red-300 items-center"
+            onPress={clearMarkers}
+          >
+            <Text className="text-gray-600 text-base">Reset</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="flex flex-row gap-2 mt-5">
+          <TouchableOpacity
+            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+            onPress={handleBuddyUp}
+            disabled={submitBuddyUp}
+          >
+            {submitBuddyUp ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <View>
+                <Image
+                  source={require("@/assets/images/buddy.png")}
+                  className="w-3/4 h-3/4 rounded-3xl mb-1"
+                  resizeMode="cover"
+                ></Image>
+                <Text className="text-gray-600 text-base font-bold">
+                  BuddyUp
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+            // onPress={}
+          >
+            <Image
+              source={require("@/assets/images/track.png")}
+              className="w-3/4 h-3/4 rounded-3xl mb-1"
+              resizeMode="cover"
+            ></Image>
+            <Text className="text-gray-600 text-base font-bold">
+              Safe Track
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
