@@ -4,7 +4,7 @@ import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View, Acti
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from 'expo-router';
 import { auth, db } from '@/firebase.config';
-import { updateDoc, doc } from 'firebase/firestore';
+import { updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/components/authContext';
 
 export default function VolunteerSignUpForm() {
@@ -109,7 +109,7 @@ export default function VolunteerSignUpForm() {
       await updateDoc(userRef, {
         isVolunteer: true,
         profilePicture: userProfile.profilePicture,
-        volunteerSignUpDate: new Date()
+        volunteerSignUpDate: serverTimestamp()
       });
 
       Alert.alert(
