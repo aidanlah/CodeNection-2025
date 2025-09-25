@@ -256,15 +256,15 @@ export default function walkWithMePage() {
       const buddyUp: BuddyUp = {
         createdAt: serverTimestamp(),
         destination: dest,
-        startLocation: start,
-        status: "pending",
         hasVolunteer: false,
-        userId: auth.currentUser.uid,
+        startLocation: start,
+        status: 'pending',
+        userId: auth.currentUser.uid
       };
 
       console.log("Submitting buddyup request:", buddyUp);
       
-      await addDoc(collection(db, "buddyUp"), buddyUp);
+      await addDoc(collection(db, 'buddyUp'), buddyUp);
 
       Alert.alert("Request Submitted", "Waiting for volunteer", [
         {
