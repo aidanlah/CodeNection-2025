@@ -1,6 +1,5 @@
-//New
+import React, { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
 import {
   Alert,
   Modal,
@@ -9,9 +8,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from '@react-navigation/native';
 // import { auth, db } from "@/firebase.config";
 // import { doc, updateDoc } from "firebase/firestore";
 
@@ -59,6 +60,18 @@ export default function EmergencyContactsPage() {
     phone: '',
     relationship: ''
   });
+
+    // ✅ Status bar configuration
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#16a34a', true);
+      }
+    }, [])
+  );
+
+
 
   // Handle back navigation
   const handleGoBack = () => {
@@ -210,7 +223,7 @@ export default function EmergencyContactsPage() {
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor="#F9FAFB" />
       
-      <ScrollView className="flex-1 px-4 pt-6 pb-4" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-4 pt-0 pb-4" showsVerticalScrollIndicator={false}>
         {/* Contacts List */}
         {contacts.length > 0 ? (
           contacts.map((contact) => (
@@ -300,7 +313,6 @@ export default function EmergencyContactsPage() {
         visible={modalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={handleCloseModal}
         onRequestClose={handleCloseModal}
       >
         <SafeAreaView className="flex-1 bg-gray-50">

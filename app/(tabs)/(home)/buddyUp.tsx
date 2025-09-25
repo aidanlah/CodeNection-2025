@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StatusBar,
+  Platform,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface LocationInputProps {
   label: string;
@@ -49,6 +52,16 @@ const JourneyPlannerPage: React.FC = () => {
   const [startingLocation, setStartingLocation] = useState<string>('');
   const [destination, setDestination] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Status bar configuration for white text on green header
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#16a34a', true);
+      }
+    }, [])
+  );
 
   const handleGoBack = (): void => {
     router.back();

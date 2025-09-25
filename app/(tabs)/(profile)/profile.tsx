@@ -75,7 +75,7 @@ export default function ProfilePage() {
 
         {/* This is your header content with the green background */}
         <View className="px-4 py-6 relative pt-4">
-          <Text className="text-xl font-semibold text-center text-white mb-6">
+          <Text className="text-2xl font-semibold text-center text-white mb-6">
             Personal Profile
           </Text>
           <TouchableOpacity 

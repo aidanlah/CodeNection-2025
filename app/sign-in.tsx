@@ -24,6 +24,7 @@ import {
 } from "firebase/auth";
 import { PublicRoute } from "@/components/publicRoute";
 import { SessionManager } from "@/services/sessionManager";
+import { StatusBar } from 'expo-status-bar';
 
 interface InputFieldProps {
   label: string;
@@ -235,12 +236,13 @@ const SignInPage: React.FC = () => {
   };
 
   return (
-    <PublicRoute>
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
+  <PublicRoute>
+    <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
           <ScrollView
             className="flex-1 px-6"
             showsVerticalScrollIndicator={false}

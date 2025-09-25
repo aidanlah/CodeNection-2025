@@ -1,5 +1,6 @@
+// notification.tsx - Updated with complete workflow
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   FlatList,
@@ -9,10 +10,12 @@ import {
   View
 } from 'react-native';
 
+import { router } from 'expo-router';
+
 // Notification interface
 interface Notification {
   id: string;
-  type: 'sos' | 'walk' | 'hazard' | 'completed';
+  type: 'sos' | 'walk' | 'hazard' | 'completed' | 'volunteer_accepted';
   category: 'alerts' | 'history';
   title: string;
   message: string;
@@ -21,17 +24,20 @@ interface Notification {
   volunteer?: string;
   location?: string;
   isUrgent?: boolean;
+  requestId?: string; // To track which request this belongs to
+  outfitDescription?: string; // For volunteer accepted notifications
+  meetingPoint?: string; // Where volunteer is waiting
 }
 
 // Sample data for GuardU notifications
-const sampleNotifications: Notification[] = [
+const initialNotifications: Notification[] = [
   // Alerts
   {
     id: '1',
     type: 'sos',
     category: 'alerts',
     title: 'SOS triggered near Library',
-    message: 'Verified volunteer 📍Ali responded.',
+    message: 'Verified volunteer 🔒Ali responded.',
     timestamp: '11:36am 16/09/23',
     icon: 'warning',
     volunteer: 'Ali',
@@ -43,11 +49,12 @@ const sampleNotifications: Notification[] = [
     type: 'walk',
     category: 'alerts',
     title: 'Walk-with-me request:',
-    message: 'Verified volunteer 📍Mei (2 mins away) is available.',
+    message: 'Ava has requested to walk with you.',
     timestamp: '11:36am 16/09/23',
     icon: 'people',
-    volunteer: 'Mei',
+    volunteer: 'You',
     location: 'Main Campus',
+    requestId: 'req_001', // Link to request
   },
   {
     id: '3',
@@ -73,7 +80,7 @@ const sampleNotifications: Notification[] = [
     id: '5',
     type: 'walk',
     category: 'history',
-    title: 'Completed: Walked with 📍Mei',
+    title: 'Completed: Walked with Ava',
     message: '(Verified volunteer).',
     timestamp: '11:36am 16/09/23',
     icon: 'checkmark-circle',
@@ -98,9 +105,16 @@ const NotificationCenter: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('alerts');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [allNotifications, setAllNotifications] = useState<Notification[]>(initialNotifications);
   const [notifications, setNotifications] = useState<Notification[]>(
-    sampleNotifications.filter(n => n.category === 'alerts')
+    initialNotifications.filter(n => n.category === 'alerts')
   );
+
+  // Listen for navigation params when returning from request flow
+  useEffect(() => {
+    // This would typically listen to route params or global state changes
+    // For now, we'll simulate the workflow with state management
+  }, []);
 
   const handleTabChange = (tab: TabType) => {
     try {
@@ -119,7 +133,7 @@ const NotificationCenter: React.FC = () => {
   };
 
   const updateNotifications = (tab: TabType, filter: FilterType) => {
-    let filteredNotifications = sampleNotifications.filter(
+    let filteredNotifications = allNotifications.filter(
       notification => notification.category === tab
     );
 
@@ -130,6 +144,51 @@ const NotificationCenter: React.FC = () => {
     }
 
     setNotifications(filteredNotifications);
+  };
+
+  const removeNotification = (notificationId: string) => {
+    const updatedNotifications = allNotifications.filter(n => n.id !== notificationId);
+    setAllNotifications(updatedNotifications);
+    updateNotifications(activeTab, activeFilter);
+  };
+
+  const addVolunteerAcceptedNotification = (requestId: string, volunteerName: string, outfitDescription: string, meetingPoint: string) => {
+    const newNotification: Notification = {
+      id: `volunteer_accepted_${Date.now()}`,
+      type: 'volunteer_accepted',
+      category: 'alerts',
+      title: `${volunteerName} accepted your buddy request!`,
+      message: `Outfit: ${outfitDescription}\nMeeting at: ${meetingPoint}`,
+      timestamp: new Date().toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+      }),
+      icon: 'person-add',
+      volunteer: volunteerName,
+      requestId: requestId,
+      outfitDescription: outfitDescription,
+      meetingPoint: meetingPoint,
+      isUrgent: true,
+    };
+
+    const updatedNotifications = [...allNotifications, newNotification];
+    setAllNotifications(updatedNotifications);
+    updateNotifications(activeTab, activeFilter);
+  };
+
+  // Simulate receiving volunteer acceptance (this would normally come from your backend)
+  const simulateVolunteerAcceptance = (requestId: string) => {
+    setTimeout(() => {
+      addVolunteerAcceptedNotification(
+        requestId,
+        'Mei Chen', 
+        'Blue jacket, holding a green umbrella', 
+        'Main Library entrance'
+      );
+    }, 3000); // 3 seconds delay to simulate the workflow
   };
 
   const getNotificationStyle = (type: Notification['type']) => {
@@ -147,6 +206,13 @@ const NotificationCenter: React.FC = () => {
           bgColor: 'bg-green-50',
           iconColor: 'text-green-600',
           iconBg: 'bg-green-100',
+        };
+      case 'volunteer_accepted':
+        return {
+          borderColor: 'border-blue-500',
+          bgColor: 'bg-blue-50',
+          iconColor: 'text-blue-600',
+          iconBg: 'bg-blue-100',
         };
       case 'hazard':
         return {
@@ -173,14 +239,72 @@ const NotificationCenter: React.FC = () => {
   };
 
   const handleNotificationPress = (notification: Notification) => {
+  // Handle walk request notifications for volunteers only
+  if (notification.type === 'walk' && notification.category === 'alerts') {
+    // This should ideally check user type (volunteer vs requester)
+    // For now, we'll assume anyone clicking is a potential volunteer
+    
+    Alert.alert(
+      'Walk Request',
+      'You can accept this buddy request. Would you like to view the details?',
+      [
+        {
+          text: 'View Details',
+          onPress: () => {
+            router.push({
+              pathname: '/RequestDetailScreen',
+              params: {
+                requestId: notification.requestId || 'req_001',
+                notificationId: notification.id,
+              }
+            });
+          }
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ]
+    );
+    return;
+  }
+
+  // Handle volunteer accepted notifications (for requesters)
+  if (notification.type === 'volunteer_accepted') {
     Alert.alert(
       notification.title,
-      `${notification.message}\n\nTime: ${notification.timestamp}${
-        notification.location ? `\nLocation: ${notification.location}` : ''
-      }${notification.volunteer ? `\nVolunteer: ${notification.volunteer}` : ''}`
+      `Your buddy request has been accepted!\n\n${notification.message}\n\nTime: ${notification.timestamp}`,
+      [
+        {
+          text: 'Start Walking',
+          onPress: () => {
+            // Navigate to walking/tracking screen
+            Alert.alert('Walking Mode', 'Walking mode would start here with live tracking.');
+          }
+        },
+        {
+          text: 'Message Volunteer',
+          onPress: () => {
+            Alert.alert('Messaging', 'In-app messaging would open here.');
+          }
+        },
+        {
+          text: 'OK',
+          style: 'cancel'
+        }
+      ]
     );
-  };
+    return;
+  }
 
+  // Default notification display
+  Alert.alert(
+    notification.title,
+    `${notification.message}\n\nTime: ${notification.timestamp}${
+      notification.location ? `\nLocation: ${notification.location}` : ''
+    }${notification.volunteer ? `\nVolunteer: ${notification.volunteer}` : ''}`
+  );
+};
   const getFilterLabel = (filter: FilterType) => {
     switch (filter) {
       case 'all': return 'All';
@@ -191,60 +315,66 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
- const renderNotificationItem = ({ item }: { item: Notification }) => {
-  const style = getNotificationStyle(item.type);
-  
-  return (
-    <TouchableOpacity
-      onPress={() => handleNotificationPress(item)}
-      className={`${style.bgColor} mx-4 my-2 p-4 rounded-xl border-l-4 ${style.borderColor} shadow-sm`}
-    >
-      <View className="flex-row items-start">
-        <View className={`w-10 h-10 rounded-full ${style.iconBg} items-center justify-center mr-3`}>
-          <Ionicons name={item.icon} size={20} color={style.iconColor.replace('text-', '#')} />
-        </View>
-        
-        <View className="flex-1">
-          <Text className="text-gray-900 font-semibold text-sm mb-1">
-            {item.title}
-          </Text>
-          <Text className="text-gray-600 text-xs leading-relaxed mb-2">
-            {item.message}
-          </Text>
-          
-          {/* Volunteer/Location badges */}
-          <View className="flex-row items-center mb-2">
-            {item.type === 'walk' && item.volunteer && (
-              <View className="bg-green-600 px-2 py-1 rounded-md mr-2">
-                <Text className="text-white text-xs font-medium">
-                  👤 {item.volunteer}
-                </Text>
-              </View>
-            )}
-            {item.type === 'hazard' && item.location && (
-              <View className="bg-yellow-600 px-2 py-1 rounded-md mr-2">
-                <Text className="text-white text-xs font-medium">
-                  📍 {item.location}
-                </Text>
-              </View>
-            )}
-            {item.isUrgent && (
-              <View className="bg-red-600 px-2 py-1 rounded-md">
-                <Text className="text-white text-xs font-medium">URGENT</Text>
-              </View>
-            )}
+  const renderNotificationItem = ({ item }: { item: Notification }) => {
+    const style = getNotificationStyle(item.type);
+    
+    return (
+      <TouchableOpacity
+        onPress={() => handleNotificationPress(item)}
+        className={`${style.bgColor} mx-4 my-2 p-4 rounded-xl border-l-4 ${style.borderColor} shadow-sm`}
+      >
+        <View className="flex-row items-start">
+          <View className={`w-10 h-10 rounded-full ${style.iconBg} items-center justify-center mr-3`}>
+            <Ionicons name={item.icon} size={20} color={style.iconColor.replace('text-', '#').replace('-600', '600').replace('-500', '500')} />
           </View>
           
-          <View className="flex-row items-center">
-            <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-            <Text className="text-gray-400 text-xs ml-1">{item.timestamp}</Text>
+          <View className="flex-1">
+            <Text className="text-gray-900 font-semibold text-sm mb-1">
+              {item.title}
+            </Text>
+            <Text className="text-gray-600 text-xs leading-relaxed mb-2">
+              {item.message}
+            </Text>
+            
+            {/* Volunteer/Location badges */}
+            <View className="flex-row items-center mb-2">
+              {item.type === 'walk' && item.volunteer && (
+                <View className="bg-green-600 px-2 py-1 rounded-md mr-2">
+                  <Text className="text-white text-xs font-medium">
+                    👤 {item.volunteer}
+                  </Text>
+                </View>
+              )}
+              {item.type === 'volunteer_accepted' && item.outfitDescription && (
+                <View className="bg-blue-600 px-2 py-1 rounded-md mr-2">
+                  <Text className="text-white text-xs font-medium">
+                    👔 Outfit Shared
+                  </Text>
+                </View>
+              )}
+              {item.type === 'hazard' && item.location && (
+                <View className="bg-yellow-600 px-2 py-1 rounded-md mr-2">
+                  <Text className="text-white text-xs font-medium">
+                    📍 {item.location}
+                  </Text>
+                </View>
+              )}
+              {item.isUrgent && (
+                <View className="bg-red-600 px-2 py-1 rounded-md">
+                  <Text className="text-white text-xs font-medium">URGENT</Text>
+                </View>
+              )}
+            </View>
+            
+            <View className="flex-row items-center">
+              <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+              <Text className="text-gray-400 text-xs ml-1">{item.timestamp}</Text>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
+      </TouchableOpacity>
+    );
+  };
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center px-6 py-20">
@@ -270,7 +400,7 @@ const NotificationCenter: React.FC = () => {
       <View className="bg-green-600" style={{ paddingTop: StatusBar.currentHeight || 44 }}>
         <View className="px-4 py-4">
           <View className="flex-row items-center justify-between">
-            <TouchableOpacity className="p-2">
+            <TouchableOpacity className="p-2" onPress={() => router.back()}>
               <Ionicons name="chevron-back" size={24} color="white" />
             </TouchableOpacity>
             

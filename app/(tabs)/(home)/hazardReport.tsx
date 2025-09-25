@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,6 +18,10 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { auth, db } from '@/firebase.config';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+
+
 
 interface HazardReport {
   location: GeoPoint;
@@ -48,6 +55,18 @@ export default function HazardReportPage() {
   const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // ✅ Status bar configuration
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('#16a34a', true);
+      }
+    }, [])
+  );
+
+
 
   // Fallback region (MMU)
   const fallbackRegion: Region = {
@@ -277,7 +296,8 @@ export default function HazardReportPage() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+
+    <SafeAreaView style={styles.container} edges={['left','right','bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Report a Hazard</Text>
         
@@ -393,6 +413,7 @@ export default function HazardReportPage() {
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
+    
   );
 }
 
@@ -409,16 +430,17 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
   },
   subtitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 10,
-    marginTop: 15,
+    marginBottom: 15,
+    marginTop: 0
+    ,
   },
   mapContainer: {
     height: 200,
@@ -433,7 +455,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 15,
+    marginBottom: 20,
   },
   hazardTypeButton: {
     paddingHorizontal: 15,
@@ -444,8 +466,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   selectedHazardType: {
-    backgroundColor: '#b7ccf6ff',
-    borderColor: '#b7ccf6ff',
+    backgroundColor: '#16a34a',
+    borderColor: '#16a34a',
   },
   hazardTypeText: {
     color: '#666',
@@ -498,7 +520,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   submitButton: {
-    backgroundColor: '#b7ccf6ff',
+    backgroundColor: '#16a34a',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -523,4 +545,6 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
   },
+
+  
 });
