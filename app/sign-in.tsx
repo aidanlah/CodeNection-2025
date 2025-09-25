@@ -158,11 +158,11 @@ const SignInPage: React.FC = () => {
       // Update last login time
       await updateLastLoginTime(user.uid);
 
-      // Store auth token securely
+      // Store session
       const token = await getIdToken(user);
-      // await SecureStorageService.storeAuthToken(token);
       await SessionManager.storeSession(user, token)
       console.log('page: session stored')
+      
     } catch (error: any) {
       console.error("Sign in error:", error);
 
