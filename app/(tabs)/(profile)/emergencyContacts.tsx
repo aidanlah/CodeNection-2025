@@ -23,6 +23,19 @@ interface EmergencyContact {
 }
 
 export default function EmergencyContactsPage() {
+  // This would be configured in your navigation stack/tabs
+  // Example for Stack Navigator:
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     title: 'Emergency Contacts',
+  //     headerRight: () => (
+  //       <TouchableOpacity onPress={handleAddContact} style={{ marginRight: 15 }}>
+  //         <Ionicons name="add" size={24} color="#16a34a" />
+  //       </TouchableOpacity>
+  //     ),
+  //   });
+  // }, [navigation]);
+
   // Mock emergency contacts - replace with Firebase data
   const [contacts, setContacts] = useState<EmergencyContact[]>([
     {
@@ -178,6 +191,8 @@ export default function EmergencyContactsPage() {
       setModalVisible(false);
       setFormData({ name: '', phone: '', relationship: '' });
       setEditingContact(null);
+      setFormData({ name: '', phone: '', relationship: '' });
+      setEditingContact(null);
       Alert.alert(
         "Success", 
         editingContact ? "Contact updated successfully!" : "Contact added successfully!"
@@ -285,6 +300,7 @@ export default function EmergencyContactsPage() {
         visible={modalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
+        onRequestClose={handleCloseModal}
         onRequestClose={handleCloseModal}
       >
         <SafeAreaView className="flex-1 bg-gray-50">

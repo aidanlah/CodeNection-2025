@@ -1,20 +1,19 @@
 import { StyleSheet, View, Alert, ActivityIndicator, TouchableOpacity, Text } from "react-native";
-import React, { useState } from 'react';
-import MapView, { Region } from 'react-native-maps';
+import React, { useState, useCallback } from 'react';
+import MapView, { Region, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase.config';
 
-// Zoom level (smaller = more zoomed in)
-const 
-  LAT_ZOOM = 0.01,
-  LONG_ZOOM = 0.01;
+const LAT_ZOOM = 0.01, LONG_ZOOM = 0.01;
 
 export default function mapPage() {
   const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hazardReports, setHazardReports] = useState<any[]>([]);
 
-  // Fallback region (MMU) in case location access fails
   const fallbackRegion: Region = {
     latitude: 2.9278,
     longitude: 101.6419,
@@ -36,22 +35,39 @@ export default function mapPage() {
     }
   };
 
-  // Check location permission every time the screen is focused
+  // Fetch hazard reports from Firestore
+  const fetchHazardReports = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'hazardReports'));
+      const reports = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
+          hazardType: data.hazardType,
+          severity: data.severity,
+          description: data.description,
+        };
+      });
+      setHazardReports(reports);
+    } catch (error) {
+      console.error('Error fetching hazard reports:', error);
+    }
+  };
+
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       checkLocationPermissionAndGetLocation();
+      fetchHazardReports();
     }, [])
   );
 
   const checkLocationPermissionAndGetLocation = async () => {
     setLoading(true);
-    
     try {
-      // Check current permission status
       const { status } = await Location.getForegroundPermissionsAsync();
-      
       if (status !== 'granted') {
-        // Permission not granted, prompt user
         Alert.alert(
           'Location Access Required',
           'GuardU needs access to your location to show nearby safety information and your current position on the map.',
@@ -73,7 +89,6 @@ export default function mapPage() {
           ]
         );
       } else {
-        // Permission already granted, get location
         await getCurrentLocation();
       }
     } catch (error) {
@@ -86,7 +101,6 @@ export default function mapPage() {
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
       if (status === 'granted') {
         await getCurrentLocation();
       } else {
@@ -111,12 +125,9 @@ export default function mapPage() {
     }
   };
 
-
   const getCurrentLocation = async () => {
     try {
-      // Request permission to access location
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
       if (status !== 'granted') {
         Alert.alert(
           'Location Permission Required',
@@ -125,7 +136,6 @@ export default function mapPage() {
             {
               text: 'OK',
               onPress: () => {
-                // Use fallback region if permission denied
                 setRegion(fallbackRegion);
                 setLoading(false);
               }
@@ -134,22 +144,17 @@ export default function mapPage() {
         );
         return;
       }
-
-      // Get current position
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-
       const currentRegion: Region = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: LAT_ZOOM,
         longitudeDelta: LONG_ZOOM,
       };
-
       setRegion(currentRegion);
       setLoading(false);
-
     } catch (error) {
       console.error('Error getting location:', error);
       Alert.alert(
@@ -168,7 +173,6 @@ export default function mapPage() {
     }
   };
 
-  // Don't render map until we have a region
   if (loading || !region) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -185,9 +189,26 @@ export default function mapPage() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         followsUserLocation={true}
-      />
+      >
+        {/* Render hazard report markers */}
+        {hazardReports.map(report => (
+          <Marker
+            key={report.id}
+            coordinate={{
+              latitude: report.latitude,
+              longitude: report.longitude,
+            }}
+            title={report.hazardType}
+            description={`${report.severity.toUpperCase()}: ${report.description}`}
+            pinColor={
+              report.severity === 'critical' ? '#EF4444' :
+              report.severity === 'moderate' ? '#F59E0B' :
+              '#10B981'
+            }
+          />
+        ))}
+      </MapView>
 
-      {/* Button */}
       <TouchableOpacity
         style={styles.reportButton}
         onPress={handleReportHazard}
