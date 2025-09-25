@@ -191,63 +191,60 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  const renderNotificationItem = ({ item }: { item: Notification }) => {
-    const style = getNotificationStyle(item.type);
-    
-    return (
-      <TouchableOpacity
-        onPress={() => handleNotificationPress(item)}
-        className={`${style.bgColor} mx-4 my-2 p-4 rounded-xl border-l-4 ${style.borderColor} shadow-sm`}
-      >
-        <View className="flex-row items-start">
-          <View className={`w-10 h-10 rounded-full ${style.iconBg} items-center justify-center mr-3`}>
-            <Ionicons name={item.icon} size={20} color={style.iconColor.replace('text-', '#')} />
-          </View>
-          
-          <View className="flex-1">
-            <Text className="text-gray-900 font-semibold text-sm mb-1">
-              {item.title}
-            </Text>
-            <Text className="text-gray-600 text-xs leading-relaxed mb-2">
-              {item.message}
-            </Text>
-            
-            {/* Volunteer/Location badges */}
-            <View className="flex-row items-center mb-2">
-              {item.type === 'walk' && item.volunteer && (
-                <View className="bg-green-600 px-2 py-1 rounded-md mr-2">
-                  <Text className="text-white text-xs font-medium">
-                    👤 {item.volunteer}
-                  </Text>
-                </View>
-              )}
-              {item.type === 'hazard' && item.location && (
-                <View className="bg-yellow-600 px-2 py-1 rounded-md mr-2">
-                  <Text className="text-white text-xs font-medium">
-                    📍 {item.location}
-                  </Text>
-                </View>
-              )}
-              {item.isUrgent && (
-                <View className="bg-red-600 px-2 py-1 rounded-md">
-                  <Text className="text-white text-xs font-medium">URGENT</Text>
-                </View>
-              )}
-            </View>
-            
-            <View className="flex-row items-center">
-              <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-              <Text className="text-gray-400 text-xs ml-1">{item.timestamp}</Text>
-            </View>
-          </View>
-          
-          <TouchableOpacity className="p-1">
-            <Ionicons name="ellipsis-vertical" size={16} color="#9CA3AF" />
-          </TouchableOpacity>
+ const renderNotificationItem = ({ item }: { item: Notification }) => {
+  const style = getNotificationStyle(item.type);
+  
+  return (
+    <TouchableOpacity
+      onPress={() => handleNotificationPress(item)}
+      className={`${style.bgColor} mx-4 my-2 p-4 rounded-xl border-l-4 ${style.borderColor} shadow-sm`}
+    >
+      <View className="flex-row items-start">
+        <View className={`w-10 h-10 rounded-full ${style.iconBg} items-center justify-center mr-3`}>
+          <Ionicons name={item.icon} size={20} color={style.iconColor.replace('text-', '#')} />
         </View>
-      </TouchableOpacity>
-    );
-  };
+        
+        <View className="flex-1">
+          <Text className="text-gray-900 font-semibold text-sm mb-1">
+            {item.title}
+          </Text>
+          <Text className="text-gray-600 text-xs leading-relaxed mb-2">
+            {item.message}
+          </Text>
+          
+          {/* Volunteer/Location badges */}
+          <View className="flex-row items-center mb-2">
+            {item.type === 'walk' && item.volunteer && (
+              <View className="bg-green-600 px-2 py-1 rounded-md mr-2">
+                <Text className="text-white text-xs font-medium">
+                  👤 {item.volunteer}
+                </Text>
+              </View>
+            )}
+            {item.type === 'hazard' && item.location && (
+              <View className="bg-yellow-600 px-2 py-1 rounded-md mr-2">
+                <Text className="text-white text-xs font-medium">
+                  📍 {item.location}
+                </Text>
+              </View>
+            )}
+            {item.isUrgent && (
+              <View className="bg-red-600 px-2 py-1 rounded-md">
+                <Text className="text-white text-xs font-medium">URGENT</Text>
+              </View>
+            )}
+          </View>
+          
+          <View className="flex-row items-center">
+            <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+            <Text className="text-gray-400 text-xs ml-1">{item.timestamp}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center px-6 py-20">
@@ -289,6 +286,9 @@ const NotificationCenter: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
+        
+        {/* Separator Line */}
+        <View className="border-b border-gray-300 mx-4"></View>
       </View>
 
       {/* Tabs and Filter Section */}

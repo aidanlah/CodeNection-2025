@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { createUserWithEmailAndPassword, getIdToken, updateProfile } from 'firebase/auth';
@@ -18,6 +19,7 @@ import { auth, db } from '@/firebase.config';
 import { PublicRoute } from "@/components/publicRoute";
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { SessionManager } from "@/services/sessionManager";
+
 
 interface InputFieldProps {
   label: string;
@@ -280,7 +282,7 @@ const SignUpPage: React.FC = () => {
           showsVerticalScrollIndicator={false}
         >
           <View className="items-center py-6">
-            <View className="bg-green-500 p-4 rounded-full mb-4">
+            <View className="bg-green-600 p-4 rounded-full mb-4">
               <Ionicons name="person-add" size={32} color="#fff" />
             </View>
             <Text className="text-2xl font-bold text-gray-900 mb-2">
@@ -355,7 +357,7 @@ const SignUpPage: React.FC = () => {
               onPress={handleSignUp}
               disabled={loading}
               className={`py-4 rounded-xl ${
-                loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
+                loading ? "bg-gray-400" : "bg-green-600 active:scale-98"
               }`}
               activeOpacity={0.8}
             >
@@ -374,7 +376,7 @@ const SignUpPage: React.FC = () => {
               Already have an account?{" "}
             </Text>
             <TouchableOpacity onPress={navigateToSignIn} activeOpacity={0.7}>
-              <Text className="text-green-600 font-semibold text-base">
+              <Text className="text-green-700 font-semibold text-base">
                 Sign In
               </Text>
             </TouchableOpacity>

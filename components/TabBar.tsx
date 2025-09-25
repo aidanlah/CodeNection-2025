@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface TabBarProps {
   activeTab?: string;
@@ -63,7 +63,7 @@ const TabBar: React.FC<TabBarProps> = ({
 
   return (
     <View className="relative">
-      <View className="bg-green-500 flex-row items-center px-4 py-2 pb-6">
+      <View className="bg-green-600 flex-row items-center px-4 py-2 pb-6">
         {tabs.slice(0, 2).map((tab, index) => renderTabItem(tab, index))}
         
         <View className="flex-1 items-center justify-center">

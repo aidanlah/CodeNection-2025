@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from "react";
+import { auth, db } from "@/firebase.config";
+import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   getIdToken,
 } from "firebase/auth";
-import { auth, db } from "@/firebase.config";
 import { PublicRoute } from "@/components/publicRoute";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { SessionManager } from "@/services/sessionManager";
+
 
 interface InputFieldProps {
   label: string;
@@ -121,6 +123,9 @@ const SignInPage: React.FC = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+
+  const { width } = Dimensions.get('window');
+  const imageSize = Math.min(width * 0.6, 200); // Responsive sizing
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -233,37 +238,46 @@ const SignInPage: React.FC = () => {
 
   return (
     <PublicRoute>
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
-          <ScrollView
-            className="flex-1 px-6"
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="items-center py-8 mt-8">
-              <View className="">
-                <Image
-                  className="w-64 h-64"
-                  source={require("@/assets/images/guardu.png")}
-                />
-              </View>
-              <Text className="text-3xl font-bold text-gray-900 mb-2 mt-6">
-                Welcome Back
-              </Text>
-            </View>
 
-            <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-              <InputField
-                label="Email Address"
-                placeholder="Enter your email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                iconName="mail"
-                error={errors.email}
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView
+          className="flex-1 px-6"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 50 }}
+        >
+          {/* Logo Section - Fixed container with proper spacing */}
+          <View className="items-center py-6 mt-4">
+            <View className="items-center justify-center" style={{ minHeight: imageSize + 40 }}>
+              <Image
+                source={require("@/assets/images/guardu.png")}
+                style={{
+                  width: imageSize,
+                  height: imageSize,
+                }}
+                resizeMode="contain"
               />
+            </View>
+            <Text className="text-3xl font-bold text-gray-700 mb-2 mt-4">
+              WELCOME BACK
+            </Text>
+          </View>
+
+          {/* Form Section */}
+          <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+            <InputField
+              label="Email Address"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              iconName="mail"
+              error={errors.email}
+            />
+
 
               <InputField
                 label="Password"
@@ -275,38 +289,45 @@ const SignInPage: React.FC = () => {
                 error={errors.password}
               />
 
-              <TouchableOpacity
-                onPress={handleForgotPassword}
-                className="self-end mb-6"
-                activeOpacity={0.7}
-              >
-                <Text className="text-green-600 font-medium">
-                  Forgot Password?
+              
+            <TouchableOpacity
+              onPress={handleForgotPassword}
+              className="self-end mb-6"
+              activeOpacity={0.7}
+            >
+              <Text className="text-green-700 font-medium">
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleSignIn}
+              disabled={loading}
+              className={`py-4 rounded-xl ${
+                loading ? "bg-gray-400" : "bg-green-600 active:scale-98"
+              }`}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-bold text-lg text-center">
+                  Sign In
+)}
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleSignIn}
-                disabled={loading}
-                className={`py-4 rounded-xl ${
-                  loading ? "bg-gray-400" : "bg-green-500 active:scale-98"
-                }`}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text className="text-white font-bold text-lg text-center">
-                    Sign In
-                  </Text>
-                )}
-              </TouchableOpacity>
+
             </View>
 
-            <View className="flex-row justify-center items-center mb-8">
-              <Text className="text-gray-600 text-base">
-                Don't have an account?{" "}
-              </Text>
+          
+          {/* Sign Up Link */}
+          <View className="flex-row justify-center items-center mb-8">
+            <Text className="text-gray-600 text-base">
+              Don't have an account?{" "}
+            </Text>
+            
+            
 
               <Link href={"/sign-up"}>
                 <Text className="text-green-600 font-semibold text-base">
