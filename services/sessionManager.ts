@@ -22,7 +22,7 @@ export class SessionManager {
           //   displayName: user.displayName,
           //   photoURL: user.photoURL,
           //   emailVerified: user.emailVerified,
-          lastLogin: new Date().toISOString(),
+        //   lastLogin: new Date().toISOString(),
         },
         tokens: {
           idToken,

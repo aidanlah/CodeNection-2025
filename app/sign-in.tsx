@@ -22,7 +22,6 @@ import {
 import { auth, db } from "@/firebase.config";
 import { PublicRoute } from "@/components/publicRoute";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import SecureStorageService from "@/services/secureStorage";
 import { SessionManager } from "@/services/sessionManager";
 
 interface InputFieldProps {

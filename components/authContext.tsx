@@ -10,7 +10,7 @@ import { auth } from "@/firebase.config";
 // import { AuthService, UserData } from '../services/authService';
 // import SecureStorageService from '../services/secureStorage';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { UserSession, AuthContextType } from "@/types/auth";
+import { UserSession, AuthContextType, SessionData } from "@/types/auth";
 import { SessionManager } from "@/services/sessionManager";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,7 +26,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const auth = getAuth();
+  // Convert Firebase User to our UserSession
+  const firebaseUserToSession = (firebaseUser: User): UserSession => ({
+    uid: firebaseUser.uid,
+    // email: firebaseUser.email,
+    // displayName: firebaseUser.displayName,
+    // photoURL: firebaseUser.photoURL,
+    // emailVerified: firebaseUser.emailVerified,
+  });
 
   useEffect(() => {
     let authUnsubscribe: (() => void) | null = null;
@@ -44,6 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setIsAuthenticated(true);
           console.log("user authenticated");
         } else {
+          setSession(null);
+          setIsAuthenticated(false);
           console.log("user not authenticated");
         }
         // if (storedToken && storedUserData) {
@@ -55,9 +64,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // }
 
         // Set up Firebase auth state listener
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-          console.log('setting up firebase auth listener')
-          setUser(firebaseUser);
+        const unsubscribe = onAuthStateChanged(auth, async(firebaseUser) => {
+          console.log(' firebase auth state changed')
+          if(firebaseUser){
+            const userSession = firebaseUserToSession(firebaseUser)
+            setSession(userSession)
+            console.log('firebase: user authenticated')
+          } else {
+            setSession(null);
+            console.log('firebase: user signed out')
+          }
           
           setLoading(false);
         });

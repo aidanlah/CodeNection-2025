@@ -12,7 +12,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({
   children, 
   redirectTo = '/(tabs)' 
 }) => {
-  const { user, loading } = useAuth();
+  const { session, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,7 +24,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({
     );
   }
 
-  if (user) {
+  if (session) {
     return <Redirect href='/' />;
   }
 

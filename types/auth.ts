@@ -6,7 +6,7 @@ export interface UserSession {
     // displayName: string | null;
     // photoURL: string | null;
     // emailVerified: boolean;
-    lastLogin: string;
+    // lastLogin: string;
   }
   
   export interface AuthTokens {
