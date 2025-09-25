@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import { auth } from "@/firebase.config";
 // import { updateDoc, doc } from "firebase/firestore";
@@ -129,55 +129,43 @@ export default function VolunteerSignUpForm() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="px-4 py-6 relative" style={{backgroundColor: '#16a34a'}}>
-        <TouchableOpacity 
-          onPress={handleGoBack}
-          className="absolute top-6 left-4"
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-xl font-semibold text-center text-white">
-          Become a Volunteer
-        </Text>
-      </View>
-
+      <StatusBar barStyle="light-content" backgroundColor="#F9FAFB" />
+      
       <ScrollView 
-        className="flex-1 px-4 pt-2"
-        contentContainerStyle={{ paddingBottom: 40 }}
+        className="flex-1" 
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: -10, paddingBottom: 32 }}
       >
         {/* Profile Picture Section */}
-        <View className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
+        <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          <Text className="text-xl font-bold text-gray-900 mb-6 text-center">
             Profile Picture
           </Text>
           
-          <View className="items-center mb-4">
-            <View className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+          <View className="items-center mb-6">
+            <View className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center mb-4">
               {user.profilePicture ? (
                 <Image 
                   source={{ uri: user.profilePicture }}
-                  className="w-24 h-24 rounded-full"
+                  className="w-28 h-28 rounded-full"
                 />
               ) : (
-                <Ionicons name="person" size={48} color="#9CA3AF" />
+                <Ionicons name="person" size={56} color="#9CA3AF" />
               )}
             </View>
             
             {!user.profilePicture && (
-              <Text className="text-gray-600 text-center mb-4 text-sm">
+              <Text className="text-gray-600 text-center mb-4 text-sm px-4 leading-5">
                 Please select an avatar to help users identify you as a volunteer
               </Text>
             )}
             
             <TouchableOpacity 
               onPress={handleSelectAvatar}
-              className="px-6 py-2 rounded-lg border border-gray-300"
+              className="px-6 py-3 rounded-lg border border-gray-300 bg-gray-50"
               activeOpacity={0.8}
             >
-              <Text className="text-gray-700 font-medium">
+              <Text className="text-gray-700 font-semibold">
                 {user.profilePicture ? "Change Avatar" : "Select Avatar"}
               </Text>
             </TouchableOpacity>
@@ -185,17 +173,17 @@ export default function VolunteerSignUpForm() {
         </View>
 
         {/* Volunteer Commitment */}
-        <View className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+        <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          <Text className="text-xl font-bold text-gray-900 mb-6">
             Volunteer Commitment
           </Text>
           
           <TouchableOpacity 
             onPress={() => setHelpOthersChecked(!helpOthersChecked)}
-            className="flex-row items-start mb-4"
+            className="flex-row items-start"
             activeOpacity={0.8}
           >
-            <View className="mr-3 mt-1">
+            <View className="mr-4 mt-1">
               <Ionicons 
                 name={helpOthersChecked ? "checkbox" : "checkmark-outline"} 
                 size={18} 
@@ -209,8 +197,8 @@ export default function VolunteerSignUpForm() {
         </View>
 
         {/* Consent Section */}
-        <View className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+        <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          <Text className="text-xl font-bold text-gray-900 mb-6">
             Consent & Agreement
           </Text>
           
@@ -219,7 +207,7 @@ export default function VolunteerSignUpForm() {
             className="flex-row items-start mb-4"
             activeOpacity={0.8}
           >
-            <View className="mr-3 mt-1">
+            <View className="mr-4 mt-1">
               <Ionicons 
                 name={consentChecked ? "checkbox" : "checkmark-outline"} 
                 size={18} 
@@ -231,12 +219,29 @@ export default function VolunteerSignUpForm() {
             </Text>
           </TouchableOpacity>
           
-          <Text className="text-gray-500 text-sm mt-2">
+          <Text className="text-gray-500 text-sm leading-5 pl-8">
             By checking this box, you consent to receiving notifications when users need assistance and agree to participate in campus safety initiatives.
           </Text>
         </View>
 
         {/* Sign Up Button */}
+        <TouchableOpacity 
+          onPress={handleSignUp}
+          disabled={isLoading || !helpOthersChecked || !consentChecked}
+          className="py-4 px-6 rounded-xl shadow-sm mb-6"
+          style={{
+            backgroundColor: isLoading || !helpOthersChecked || !consentChecked ? '#9CA3AF' : '#16a34a'
+          }}
+          activeOpacity={0.8}
+        />
+          <View className="flex-row items-center justify-center">
+            {isLoading ? (
+              <Ionicons name="refresh" size={20} color="#fff" />
+            ) : (
+              <Ionicons name="checkmark-circle" size={20} color="#fff" />
+            )}
+            <Text className="ml-2 text-white font-bold text-lg">
+              {isLoading ? 'Signing Up...' : 'Sign Up as Volunteer'}
         <View className="flex-row justify-center mt-4">
           <TouchableOpacity
             onPress={handleSignUp}
@@ -255,11 +260,11 @@ export default function VolunteerSignUpForm() {
         </View>
 
         {/* Info Section */}
-        <View className="bg-blue-50 rounded-lg p-4 mt-6">
+        <View className="bg-blue-50 rounded-xl p-5">
           <View className="flex-row items-start">
-            <Ionicons name="information-circle" size={20} color="#3B82F6" />
+            <Ionicons name="information-circle" size={22} color="#3B82F6" />
             <View className="ml-3 flex-1">
-              <Text className="text-blue-800 font-semibold mb-1">
+              <Text className="text-blue-800 font-bold mb-2 text-base">
                 What does being a volunteer mean?
               </Text>
               <Text className="text-blue-700 text-sm leading-5">
