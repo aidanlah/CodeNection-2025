@@ -1,4 +1,5 @@
 import { auth } from "@/firebase.config";
+import { SessionManager } from "@/services/sessionManager";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from "firebase/auth";
@@ -30,6 +31,7 @@ export default function ProfilePage() {
 
   const handleLogout = async (): Promise<void> => {
     try {
+      await SessionManager.clearSession();
       await signOut(auth);
       console.log("user logged out");
       // navigate to login screen after successful logout
@@ -65,6 +67,7 @@ export default function ProfilePage() {
   };
 
   return (
+
     <View style={{ flex: 1, backgroundColor: '#16a34a' }}>
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
       

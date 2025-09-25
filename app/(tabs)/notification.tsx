@@ -56,7 +56,7 @@ const sampleNotifications: Notification[] = [
     title: 'New hazard reported near Main Gate',
     message: 'Reported by student. Maintenance team has been notified.',
     timestamp: '11:36am 16/09/23',
-    icon: 'alert-triangle',
+    icon: 'alert-circle-sharp',
     location: 'Main Gate',
   },
   // History

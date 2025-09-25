@@ -12,7 +12,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   fallback = "/sign-in" 
 }) => {
-  const { user, loading } = useAuth();
+  const { session, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,7 +24,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!user) {
+  if (!session) {
     return <Redirect href='/sign-in' />;
   }
 

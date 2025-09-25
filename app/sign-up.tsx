@@ -1,9 +1,3 @@
-import { PublicRoute } from "@/components/publicRoute";
-import { auth, db } from '@/firebase.config';
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +11,15 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { createUserWithEmailAndPassword, getIdToken, updateProfile } from 'firebase/auth';
+import { auth, db } from '@/firebase.config';
+import { PublicRoute } from "@/components/publicRoute";
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { SessionManager } from "@/services/sessionManager";
+
 
 interface InputFieldProps {
   label: string;
@@ -209,6 +212,11 @@ const SignUpPage: React.FC = () => {
       // Create user profile in Firestore
       await createUserProfile(user, formData);
 
+      // Store session
+      const token = await getIdToken(user);
+      await SessionManager.storeSession(user, token)
+      console.log('Page: session stored')
+
       const displayID = generateDisplayID(formData.fullName, formData.studentID);
 
       Alert.alert(
@@ -217,10 +225,13 @@ const SignUpPage: React.FC = () => {
         [
           {
             text: "OK",
-            onPress: () => router.replace('./(tabs)')
+            onPress: () => {}
           },
         ]
       );
+
+      
+
     } catch (error: any) {
       console.error('Sign up error:', error);
       
