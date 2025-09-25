@@ -36,7 +36,6 @@ export default function RootLayout() {
               name="sign-up"
               options={{ headerShown: false, animation: "slide_from_right" }}
             />
-            {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
           </Stack>
 
           <StatusBar style="auto" />

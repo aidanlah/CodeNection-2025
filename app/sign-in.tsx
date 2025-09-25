@@ -1,11 +1,6 @@
-import { PublicRoute } from "@/components/publicRoute";
 import { auth, db } from "@/firebase.config";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import {
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useState } from "react";
 import {
@@ -22,6 +17,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  getIdToken,
+} from "firebase/auth";
+import { PublicRoute } from "@/components/publicRoute";
+import { SessionManager } from "@/services/sessionManager";
+
 
 interface InputFieldProps {
   label: string;
@@ -36,21 +39,23 @@ interface InputFieldProps {
 
 const updateLastLoginTime = async (userId: string) => {
   try {
-    console.log('Attempting to update last login for user:', userId);
-    
-    const userRef = doc(db, 'users', userId);
+    console.log("Attempting to update last login for user:", userId);
+
+    const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       lastLoginAt: serverTimestamp(),
     });
-    console.log(userId)
-    console.log('Last login time updated successfully');
+    console.log(userId);
+    console.log("Last login time updated successfully");
   } catch (error: any) {
-    console.error('Error updating last login time:', error);
-    
-    if (error.code === 'permission-denied') {
-      console.log('Permission denied - check if user document exists with correct ID');
-    } else if (error.code === 'not-found') {
-      console.log('User document not found - may need to create profile');
+    console.error("Error updating last login time:", error);
+
+    if (error.code === "permission-denied") {
+      console.log(
+        "Permission denied - check if user document exists with correct ID"
+      );
+    } else if (error.code === "not-found") {
+      console.log("User document not found - may need to create profile");
     }
   }
 };
@@ -158,11 +163,13 @@ const SignInPage: React.FC = () => {
       // Update last login time
       await updateLastLoginTime(user.uid);
 
-      // Navigate to main app
-      // router.replace('./(tabs)');
-
+      // Store session
+      const token = await getIdToken(user);
+      await SessionManager.storeSession(user, token)
+      console.log('page: session stored')
+      
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error("Sign in error:", error);
 
       let errorMessage = "Sign In Failed. Please try again.";
       switch (error.code) {
@@ -175,7 +182,7 @@ const SignInPage: React.FC = () => {
         case "auth/invalid-email":
           errorMessage = "Invalid email address.";
           break;
-          case "auth/invalid-credential":
+        case "auth/invalid-credential":
           errorMessage = "Invalid email or password.";
           break;
         case "auth/user-disabled":
@@ -190,7 +197,7 @@ const SignInPage: React.FC = () => {
         default:
           errorMessage = error.message || errorMessage;
       }
-      Alert.alert('Sign In Failed', errorMessage);
+      Alert.alert("Sign In Failed", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -231,6 +238,7 @@ const SignInPage: React.FC = () => {
 
   return (
     <PublicRoute>
+
     <SafeAreaView className="flex-1 bg-gray-50">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -270,16 +278,18 @@ const SignInPage: React.FC = () => {
               error={errors.email}
             />
 
-            <InputField
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={true}
-              iconName="lock-closed"
-              error={errors.password}
-            />
 
+              <InputField
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={true}
+                iconName="lock-closed"
+                error={errors.password}
+              />
+
+              
             <TouchableOpacity
               onPress={handleForgotPassword}
               className="self-end mb-6"
@@ -303,26 +313,31 @@ const SignInPage: React.FC = () => {
               ) : (
                 <Text className="text-white font-bold text-lg text-center">
                   Sign In
+)}
                 </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+              </TouchableOpacity>
 
+
+            </View>
+
+          
           {/* Sign Up Link */}
           <View className="flex-row justify-center items-center mb-8">
             <Text className="text-gray-600 text-base">
               Don't have an account?{" "}
             </Text>
             
-            <Link href={"/sign-up"}>
-              <Text className="text-green-700 font-semibold text-base">
-                Sign Up
-              </Text>
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            
+
+              <Link href={"/sign-up"}>
+                <Text className="text-green-600 font-semibold text-base">
+                  Sign Up
+                </Text>
+              </Link>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </PublicRoute>
   );
 };
