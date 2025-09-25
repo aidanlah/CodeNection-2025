@@ -48,7 +48,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
                 return 'location-outline';
               case 'notification':
                 return 'notifications-outline';
-              case 'profile':
+              case '(profile)':
                 return 'person-outline';
               default:
                 return 'ellipse-outline';
@@ -89,7 +89,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 export default function TabsLayout() {
   return (
-    <ProtectedRoute>
+    // <ProtectedRoute>
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
@@ -124,14 +124,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="(profile)"
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
         }}
       />
     </Tabs>
-    </ProtectedRoute>
+    // </ProtectedRoute>
   );
 }
 

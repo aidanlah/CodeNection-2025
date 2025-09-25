@@ -143,7 +143,11 @@ export default function VolunteerSignUpForm() {
         </Text>
       </View>
 
-      <ScrollView className="flex-1 px-4 py-6">
+      <ScrollView 
+        className="flex-1 px-4 pt-2"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Picture Section */}
         <View className="bg-white rounded-lg p-6 shadow-sm mb-6">
           <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
@@ -193,8 +197,8 @@ export default function VolunteerSignUpForm() {
           >
             <View className="mr-3 mt-1">
               <Ionicons 
-                name={helpOthersChecked ? "checkbox" : "square-outline"} 
-                size={24} 
+                name={helpOthersChecked ? "checkbox" : "checkmark-outline"} 
+                size={18} 
                 color={helpOthersChecked ? "#16a34a" : "#9CA3AF"} 
               />
             </View>
@@ -217,8 +221,8 @@ export default function VolunteerSignUpForm() {
           >
             <View className="mr-3 mt-1">
               <Ionicons 
-                name={consentChecked ? "checkbox" : "square-outline"} 
-                size={24} 
+                name={consentChecked ? "checkbox" : "checkmark-outline"} 
+                size={18} 
                 color={consentChecked ? "#16a34a" : "#9CA3AF"} 
               />
             </View>
@@ -233,26 +237,22 @@ export default function VolunteerSignUpForm() {
         </View>
 
         {/* Sign Up Button */}
-        <TouchableOpacity 
-          onPress={handleSignUp}
-          disabled={isLoading || !helpOthersChecked || !consentChecked}
-          className="py-4 px-6 rounded-xl shadow-sm"
-          style={{
-            backgroundColor: isLoading || !helpOthersChecked || !consentChecked ? '#9CA3AF' : '#16a34a'
-          }}
-          activeOpacity={0.8}
-        >
-          <View className="flex-row items-center justify-center">
-            {isLoading ? (
-              <Ionicons name="refresh" size={20} color="#fff" />
-            ) : (
-              <Ionicons name="checkmark-circle" size={20} color="#fff" />
-            )}
-            <Text className="ml-2 text-white font-bold text-lg">
-              {isLoading ? 'Signing Up...' : 'Sign Up as Volunteer'}
+        <View className="flex-row justify-center mt-4">
+          <TouchableOpacity
+            onPress={handleSignUp}
+            disabled={isLoading || !helpOthersChecked || !consentChecked}
+            className="px-4 py-2 rounded-full"
+            style={{
+              backgroundColor: isLoading || !helpOthersChecked || !consentChecked ? '#9CA3AF' : '#16a34a',
+              minWidth: 160
+            }}
+            activeOpacity={0.8}
+          >
+            <Text className="text-white font-medium text-sm text-center">
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
             </Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
 
         {/* Info Section */}
         <View className="bg-blue-50 rounded-lg p-4 mt-6">

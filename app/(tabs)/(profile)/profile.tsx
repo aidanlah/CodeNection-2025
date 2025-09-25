@@ -50,13 +50,13 @@ export default function ProfilePage() {
   // Function to handle becoming a volunteer
   const handleBecomeVolunteer = () => {
     // Navigate to volunteer signup page
-    router.push('/(tabs)/(home)/volunteerSignUp');
+    router.push('./volunteerSignUp');
   };
 
   // Function to handle adding emergency contact
   const handleAddEmergencyContact = () => {
     // Navigate to add emergency contact page
-   router.push('/(tabs)/(home)/emergencyContacts')
+   router.push('./emergencyContacts')
   };
 
   // Function to handle viewing volunteer records
@@ -73,7 +73,7 @@ export default function ProfilePage() {
           Personal Profile
         </Text>
         <TouchableOpacity 
-          onPress={handleLogout}
+          // onPress={handleLogout}
           className="absolute top-6 right-4 bg-red-500 px-3 py-1 rounded"
           activeOpacity={0.8}
         >
