@@ -1,8 +1,8 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { ProtectedRoute } from '@/components/protectedRoute';
+import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const handleSOSPress = (): void => {
@@ -12,7 +12,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
   return (
     <View className="relative">
-      <View className="bg-green-500 flex-row items-center px-4 py-2 pb-6">
+      <View className="bg-green-600 flex-row items-center px-4 py-2 pb-6">
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
           const label = options.tabBarLabel !== undefined 
@@ -78,7 +78,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           className="size-20 bg-red-500 rounded-2xl items-center justify-center shadow-lg active:scale-95"
           activeOpacity={0.8}
         >
-          <Text className="text-white font-bold text-sm tracking-wider">
+          <Text className="text-white font-bold text-xl tracking-wider">
             SOS
           </Text>
         </TouchableOpacity>
