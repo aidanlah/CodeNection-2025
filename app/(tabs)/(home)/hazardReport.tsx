@@ -8,6 +8,8 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,6 +17,7 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { auth, db } from '@/firebase.config';
+import { Ionicons } from '@expo/vector-icons';
 
 interface HazardReport {
   location: GeoPoint;
@@ -64,7 +67,7 @@ export default function HazardReportPage() {
   // Add this updated initializeLocation function
   const initializeLocation = async () => {
     try {
-      // If coordinates passed from map tab, use them
+      // If coordinates passed from map tab
       if (params.latitude && params.longitude) {
         const lat = parseFloat(params.latitude as string);
         const lng = parseFloat(params.longitude as string);
@@ -86,7 +89,6 @@ export default function HazardReportPage() {
       const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
       
       if (currentStatus !== 'granted') {
-        // Show permission request alert
         Alert.alert(
           'Location Access Required',
           'GuardU needs access to your location to help you report hazards accurately. This helps other students know exactly where the hazard is located.',
@@ -108,7 +110,6 @@ export default function HazardReportPage() {
           ]
         );
       } else {
-        // Permission already granted, get current location
         await getCurrentLocation();
       }
       
@@ -119,7 +120,6 @@ export default function HazardReportPage() {
     }
   };
 
-  // Add these helper functions
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -278,120 +278,128 @@ export default function HazardReportPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Report a Hazard</Text>
-        
-        <Text style={styles.subtitle}>Tap on the map to select location:</Text>
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            region={region}
-            onPress={handleMapPress}
-            showsUserLocation={true}
-          >
-            {markerLocation && (
-              <Marker
-                coordinate={markerLocation}
-                title="Hazard Location"
-                pinColor="red"
-              />
-            )}
-          </MapView>
-        </View>
-
-        <Text style={styles.subtitle}>Hazard Type:</Text>
-        <View style={styles.hazardTypeContainer}>
-          {HAZARD_TYPES.map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[
-                styles.hazardTypeButton,
-                selectedHazardType === type && styles.selectedHazardType,
-              ]}
-              onPress={() => setSelectedHazardType(type)}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.flex1}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.subtitle}>Tap on the map to select location:</Text>
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              region={region}
+              onPress={handleMapPress}
+              showsUserLocation={true}
             >
-              <Text
+              {markerLocation && (
+                <Marker
+                  coordinate={markerLocation}
+                  title="Hazard Location"
+                  pinColor="red"
+                />
+              )}
+            </MapView>
+          </View>
+
+          <Text style={styles.subtitle}>Hazard Type:</Text>
+          <View style={styles.hazardTypeContainer}>
+            {HAZARD_TYPES.map((type) => (
+              <TouchableOpacity
+                key={type}
                 style={[
-                  styles.hazardTypeText,
-                  selectedHazardType === type && styles.selectedHazardTypeText,
+                  styles.hazardTypeButton,
+                  selectedHazardType === type && styles.selectedHazardType,
                 ]}
+                onPress={() => setSelectedHazardType(type)}
               >
-                {type}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <Text style={styles.subtitle}>Severity Level:</Text>
-        <View style={styles.severityContainer}>
-          {SEVERITY_LEVELS.map((severity) => (
-            <TouchableOpacity
-              key={severity.value}
-              style={[
-                styles.severityButton,
-                selectedSeverity === severity.value && {
-                  backgroundColor: severity.color,
-                  borderColor: severity.color,
-                },
-              ]}
-              onPress={() => setSelectedSeverity(severity.value)}
-            >
-              <View style={styles.severityContent}>
                 <Text
                   style={[
-                    styles.severityLabel,
-                    selectedSeverity === severity.value && styles.selectedSeverityText,
+                    styles.hazardTypeText,
+                    selectedHazardType === type && styles.selectedHazardTypeText,
                   ]}
                 >
-                  {severity.label}
+                  {type}
                 </Text>
-                <Text
-                  style={[
-                    styles.severityDescription,
-                    selectedSeverity === severity.value && styles.selectedSeverityText,
-                  ]}
-                >
-                  {severity.description}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <Text style={styles.subtitle}>Description:</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Describe the hazard in detail (minimum 10 characters)..."
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-          maxLength={1000}
-        />
-        <Text style={styles.characterCount}>
-          {description.length}/1000 characters
-        </Text>
+          <Text style={styles.subtitle}>Severity Level:</Text>
+          <View style={styles.severityContainer}>
+            {SEVERITY_LEVELS.map((severity) => (
+              <TouchableOpacity
+                key={severity.value}
+                style={[
+                  styles.severityButton,
+                  selectedSeverity === severity.value && {
+                    backgroundColor: severity.color,
+                    borderColor: severity.color,
+                  },
+                ]}
+                onPress={() => setSelectedSeverity(severity.value)}
+              >
+                <View style={styles.severityContent}>
+                  <Text
+                    style={[
+                      styles.severityLabel,
+                      selectedSeverity === severity.value && styles.selectedSeverityText,
+                    ]}
+                  >
+                    {severity.label}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.severityDescription,
+                      selectedSeverity === severity.value && styles.selectedSeverityText,
+                    ]}
+                  >
+                    {severity.description}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <TouchableOpacity
-          style={[styles.submitButton, submitting && styles.disabledButton]}
-          onPress={handleSubmitReport}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.submitButtonText}>Submit Report</Text>
-          )}
-        </TouchableOpacity>
+          <Text style={styles.subtitle}>Description:</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Describe the hazard in detail (minimum 10 characters)..."
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+            maxLength={1000}
+          />
+          <Text style={styles.characterCount}>
+            {description.length}/1000 characters
+          </Text>
 
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <TouchableOpacity
+            style={[styles.submitButton, submitting && styles.disabledButton]}
+            onPress={handleSubmitReport}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.submitButtonText}>Submit Report</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -401,24 +409,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  flex1: {
+    flex: 1,
+  },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   scrollContainer: {
     padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+    paddingBottom: 100,
   },
   subtitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
-    marginTop: 15,
   },
   mapContainer: {
     height: 200,
@@ -498,7 +503,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   submitButton: {
-    backgroundColor: '#b7ccf6ff',
+    backgroundColor: '#96b5f5ff',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -508,11 +513,12 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitButtonText: {
-    color: 'white',
+    color: 'black',
     fontSize: 16,
     fontWeight: '600',
   },
   cancelButton: {
+    backgroundColor: '#ec8888ff', // red color code
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -520,7 +526,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   cancelButtonText: {
-    color: '#666',
+    color: 'black',
     fontSize: 16,
   },
 });
