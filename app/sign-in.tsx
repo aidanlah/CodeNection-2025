@@ -1,7 +1,7 @@
 import { auth, db } from "@/firebase.config";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -24,7 +24,6 @@ import {
 } from "firebase/auth";
 import { PublicRoute } from "@/components/publicRoute";
 import { SessionManager } from "@/services/sessionManager";
-
 
 interface InputFieldProps {
   label: string;
@@ -124,7 +123,7 @@ const SignInPage: React.FC = () => {
     {}
   );
 
-  const { width } = Dimensions.get('window');
+  const { width } = Dimensions.get("window");
   const imageSize = Math.min(width * 0.6, 200); // Responsive sizing
 
   const validateForm = (): boolean => {
@@ -165,9 +164,8 @@ const SignInPage: React.FC = () => {
 
       // Store session
       const token = await getIdToken(user);
-      await SessionManager.storeSession(user, token)
-      console.log('page: session stored')
-      
+      await SessionManager.storeSession(user, token);
+      console.log("page: session stored");
     } catch (error: any) {
       console.error("Sign in error:", error);
 
@@ -238,46 +236,47 @@ const SignInPage: React.FC = () => {
 
   return (
     <PublicRoute>
-
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
-          className="flex-1 px-6"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 50 }}
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
         >
-          {/* Logo Section - Fixed container with proper spacing */}
-          <View className="items-center py-6 mt-4">
-            <View className="items-center justify-center" style={{ minHeight: imageSize + 40 }}>
-              <Image
-                source={require("@/assets/images/guardu.png")}
-                style={{
-                  width: imageSize,
-                  height: imageSize,
-                }}
-                resizeMode="contain"
-              />
+          <ScrollView
+            className="flex-1 px-6"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 50 }}
+          >
+            {/* Logo Section - Fixed container with proper spacing */}
+            <View className="items-center py-6 mt-4">
+              <View
+                className="items-center justify-center"
+                style={{ minHeight: imageSize + 40 }}
+              >
+                <Image
+                  source={require("@/assets/images/guardu.png")}
+                  style={{
+                    width: imageSize,
+                    height: imageSize,
+                  }}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text className="text-3xl font-bold text-gray-700 mb-2 mt-4">
+                WELCOME BACK
+              </Text>
             </View>
-            <Text className="text-3xl font-bold text-gray-700 mb-2 mt-4">
-              WELCOME BACK
-            </Text>
-          </View>
 
-          {/* Form Section */}
-          <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <InputField
-              label="Email Address"
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              iconName="mail"
-              error={errors.email}
-            />
-
+            {/* Form Section */}
+            <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+              <InputField
+                label="Email Address"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                iconName="mail"
+                error={errors.email}
+              />
 
               <InputField
                 label="Password"
@@ -289,45 +288,39 @@ const SignInPage: React.FC = () => {
                 error={errors.password}
               />
 
-              
-            <TouchableOpacity
-              onPress={handleForgotPassword}
-              className="self-end mb-6"
-              activeOpacity={0.7}
-            >
-              <Text className="text-green-700 font-medium">
-                Forgot Password?
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleSignIn}
-              disabled={loading}
-              className={`py-4 rounded-xl ${
-                loading ? "bg-gray-400" : "bg-green-600 active:scale-98"
-              }`}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className="text-white font-bold text-lg text-center">
-                  Sign In
-)}
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                className="self-end mb-6"
+                activeOpacity={0.7}
+              >
+                <Text className="text-green-700 font-medium">
+                  Forgot Password?
                 </Text>
               </TouchableOpacity>
 
-
+              <TouchableOpacity
+                onPress={handleSignIn}
+                disabled={loading}
+                className={`py-4 rounded-xl ${
+                  loading ? "bg-gray-400" : "bg-green-600 active:scale-98"
+                }`}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white font-bold text-lg text-center">
+                    Sign In
+                  </Text>
+                )}
+              </TouchableOpacity>
             </View>
 
-          
-          {/* Sign Up Link */}
-          <View className="flex-row justify-center items-center mb-8">
-            <Text className="text-gray-600 text-base">
-              Don't have an account?{" "}
-            </Text>
-            
-            
+            {/* Sign Up Link */}
+            <View className="flex-row justify-center items-center mb-8">
+              <Text className="text-gray-600 text-base">
+                Don't have an account?{" "}
+              </Text>
 
               <Link href={"/sign-up"}>
                 <Text className="text-green-600 font-semibold text-base">
