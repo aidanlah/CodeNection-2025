@@ -1,9 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import { auth } from "@/firebase.config";
-// import { updateDoc, doc } from "firebase/firestore";
 
 export default function VolunteerSignUpForm() {
   // Define user type
@@ -131,10 +129,20 @@ export default function VolunteerSignUpForm() {
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor="#F9FAFB" />
       
+      {/* Header */}
+      <View className="flex-row items-center px-4 py-2 bg-white shadow-sm">
+        <TouchableOpacity onPress={handleGoBack} className="p-2">
+          <Ionicons name="arrow-back" size={24} color="#374151" />
+        </TouchableOpacity>
+        <Text className="flex-1 text-center text-lg font-semibold text-gray-900 mr-10">
+          Become a Volunteer
+        </Text>
+      </View>
+      
       <ScrollView 
         className="flex-1" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: -10, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32 }}
       >
         {/* Profile Picture Section */}
         <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
@@ -233,31 +241,18 @@ export default function VolunteerSignUpForm() {
             backgroundColor: isLoading || !helpOthersChecked || !consentChecked ? '#9CA3AF' : '#16a34a'
           }}
           activeOpacity={0.8}
-        />
+        >
           <View className="flex-row items-center justify-center">
             {isLoading ? (
-              <Ionicons name="refresh" size={20} color="#fff" />
+              <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Ionicons name="checkmark-circle" size={20} color="#fff" />
             )}
             <Text className="ml-2 text-white font-bold text-lg">
               {isLoading ? 'Signing Up...' : 'Sign Up as Volunteer'}
-        <View className="flex-row justify-center mt-4">
-          <TouchableOpacity
-            onPress={handleSignUp}
-            disabled={isLoading || !helpOthersChecked || !consentChecked}
-            className="px-4 py-2 rounded-full"
-            style={{
-              backgroundColor: isLoading || !helpOthersChecked || !consentChecked ? '#9CA3AF' : '#16a34a',
-              minWidth: 160
-            }}
-            activeOpacity={0.8}
-          >
-            <Text className="text-white font-medium text-sm text-center">
-              {isLoading ? 'Signing Up...' : 'Sign Up'}
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Info Section */}
         <View className="bg-blue-50 rounded-xl p-5">
