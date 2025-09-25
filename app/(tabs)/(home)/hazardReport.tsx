@@ -17,7 +17,7 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { auth, db } from '@/firebase.config';
-import { Ionicons } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 
 interface HazardReport {
   location: GeoPoint;
@@ -26,6 +26,8 @@ interface HazardReport {
   reportedBy: string;
   timestamp: any;
   severity: string;
+  upvotes: number;
+  upvotedBy: string[];
 }
 
 const HAZARD_TYPES = [
@@ -233,6 +235,8 @@ export default function HazardReportPage() {
         reportedBy: auth.currentUser.uid,
         timestamp: serverTimestamp(),
         severity: selectedSeverity,
+        upvotes: 1,
+        upvotedBy: [auth.currentUser.uid]
       };
 
       console.log('Submitting hazard report:', hazardReport);
