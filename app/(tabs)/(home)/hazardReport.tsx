@@ -15,9 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, GeoPoint, doc, updateDoc, arrayUnion, arrayRemove, increment } from 'firebase/firestore';
 import { auth, db } from '@/firebase.config';
-// import { Ionicons } from '@expo/vector-icons';
 
 interface HazardReport {
   location: GeoPoint;
@@ -43,6 +42,37 @@ const SEVERITY_LEVELS = [
   { value: 'moderate', label: 'Moderate', color: '#F59E0B', description: 'Needs attention' },
   { value: 'critical', label: 'Critical', color: '#EF4444', description: 'Immediate action required' }
 ];
+
+export const toggleUpvote = async (reportId: string, currentUpvotedBy: string[]) => {
+  if (!auth.currentUser) {
+    throw new Error('Must be logged in to upvote');
+  }
+
+  const userId = auth.currentUser.uid;
+  const reportRef = doc(db, 'hazardReports', reportId);
+  
+  const hasUpvoted = currentUpvotedBy.includes(userId);
+
+  try {
+    if (hasUpvoted) {
+      // Remove upvote
+      await updateDoc(reportRef, {
+        upvotes: increment(-1),
+        upvotedBy: arrayRemove(userId)
+      });
+    } else {
+      // Add upvote
+      await updateDoc(reportRef, {
+        upvotes: increment(1),
+        upvotedBy: arrayUnion(userId)
+      });
+    }
+    return !hasUpvoted; // Return new upvote state
+  } catch (error) {
+    console.error('Error toggling upvote:', error);
+    throw error;
+  }
+};
 
 export default function HazardReportPage() {
   const params = useLocalSearchParams();
