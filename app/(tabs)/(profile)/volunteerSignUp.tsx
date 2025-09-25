@@ -2,18 +2,23 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from 'expo-router';
+import { auth, db } from '@/firebase.config';
+import { updateDoc, doc } from 'firebase/firestore';
+import { useAuth } from '@/components/authContext';
 
 export default function VolunteerSignUpForm() {
+  const { user } = useAuth();
   // Define user type
-  interface User {
+  interface UserProfile {
     displayName: string;
     profilePicture: string | null;
   }
 
-  // Mock user data - replace with your Firebase data fetching
-  const [user, setUser] = useState<User>({
-    displayName: "Wade Warren",
-    profilePicture: null, // Will be null initially
+  // Use actual user data or fallback
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    displayName: user?.displayName || "User",
+    profilePicture: null,
   });
 
   const [helpOthersChecked, setHelpOthersChecked] = useState(false);
@@ -22,8 +27,8 @@ export default function VolunteerSignUpForm() {
 
   // Handle back navigation
   const handleGoBack = () => {
-    console.log("Navigate back to profile page");
-    // router.back(); or navigation.goBack();
+    router.back(); // or navigation.goBack();
+    // console.log("Navigate back to profile page");
   };
 
   // Avatar options
@@ -38,7 +43,7 @@ export default function VolunteerSignUpForm() {
   // Select avatar helper function
   const selectAvatar = (index: number) => {
     if (index >= 0 && index < avatarOptions.length) {
-      setUser(prev => ({
+      setUserProfile(prev => ({
         ...prev, 
         profilePicture: avatarOptions[index]
       }));
@@ -91,19 +96,21 @@ export default function VolunteerSignUpForm() {
       return;
     }
 
+    if (!auth.currentUser) {
+      Alert.alert("Error", "You must be logged in to become a volunteer.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Here you would update the user's volunteer status in Firebase
-      // const userRef = doc(db, "users", auth.currentUser.uid);
-      // await updateDoc(userRef, {
-      //   isVolunteer: true,
-      //   profilePicture: user.profilePicture,
-      //   volunteerSignUpDate: new Date()
-      // });
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Update the user's volunteer status in Firebase
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, {
+        isVolunteer: true,
+        profilePicture: userProfile.profilePicture,
+        volunteerSignUpDate: new Date()
+      });
 
       Alert.alert(
         "Success!",
@@ -111,14 +118,12 @@ export default function VolunteerSignUpForm() {
         [
           {
             text: "OK",
-            onPress: () => {
-              console.log("Navigate back to profile");
-              // Navigate back to profile page
-            }
+            onPress: () => router.back()
           }
         ]
       );
     } catch (error) {
+      console.error("Error signing up as volunteer:", error);
       Alert.alert("Error", "Failed to sign up as volunteer. Please try again.");
     } finally {
       setIsLoading(false);
@@ -152,9 +157,9 @@ export default function VolunteerSignUpForm() {
           
           <View className="items-center mb-6">
             <View className="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-              {user.profilePicture ? (
+              {userProfile.profilePicture ? (
                 <Image 
-                  source={{ uri: user.profilePicture }}
+                  source={{ uri: userProfile.profilePicture }}
                   className="w-28 h-28 rounded-full"
                 />
               ) : (
@@ -162,7 +167,7 @@ export default function VolunteerSignUpForm() {
               )}
             </View>
             
-            {!user.profilePicture && (
+            {!userProfile.profilePicture && (
               <Text className="text-gray-600 text-center mb-4 text-sm px-4 leading-5">
                 Please select an avatar to help users identify you as a volunteer
               </Text>
@@ -174,7 +179,7 @@ export default function VolunteerSignUpForm() {
               activeOpacity={0.8}
             >
               <Text className="text-gray-700 font-semibold">
-                {user.profilePicture ? "Change Avatar" : "Select Avatar"}
+                {userProfile.profilePicture ? "Change Avatar" : "Select Avatar"}
               </Text>
             </TouchableOpacity>
           </View>

@@ -19,7 +19,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        {/* <AuthProvider> */}
+        <AuthProvider>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -40,7 +40,7 @@ export default function RootLayout() {
           </Stack>
 
           <StatusBar style="auto" />
-        {/* </AuthProvider> */}
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
