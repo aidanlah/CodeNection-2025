@@ -19,27 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "RECORD_AUDIO",
-        "MODIFY_AUDIO_SETTINGS",
-        "WAKE_LOCK",
-        "VIBRATE",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE"
-      ]
-    },
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs location access for emergency services.",
-        "NSLocationWhenInUseUsageDescription": "This app needs location access for emergency services.",
-        "NSMicrophoneUsageDescription": "This app needs microphone access for emergency audio recording.",
-        "UIBackgroundModes": ["location", "audio"]
-      }
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -60,30 +40,7 @@
           }
         }
       ],
-      "expo-secure-store",
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "This app needs location access for emergency services.",
-          "locationWhenInUsePermission": "This app needs location access for emergency services.",
-          "isIosBackgroundLocationEnabled": true,
-          "isAndroidBackgroundLocationEnabled": true
-        }
-      ],
-      [
-        "expo-av",
-        {
-          "microphonePermission": "This app needs microphone access for emergency audio recording."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/notification-icon.png",
-          "color": "#4CAF50",
-          "defaultChannel": "emergency-alerts"
-        }
-      ]
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
