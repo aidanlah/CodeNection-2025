@@ -15,47 +15,30 @@ https://youtu.be/k-touAUszq8?si=WPy-iBYMNaCJjCP_
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Get started
+## 🚀 Setup
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+To get started with the project:
 
 ```bash
-npm run reset-project
-```
+npm install
+npx expo start
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🧰 Tech Stack
+Frontend: React Native + Expo
 
-## Learn more
+Backend: Firebase
 
-To learn more about developing your project with Expo, look at the following resources:
+Navigation: Expo Router
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Storage: Firestore + AsyncStorage
 
-## Core features
+## 🧠 Architecture
+
+- **Home Tab**: Buddy matching, hazard reporting
+- **Profile Tab**: Emergency contact management, volunteer sign-up
+- **Global Screens**: SOS trigger, map view, notifications
+
+## 🔑 Core features
 
 SOS Button: Instantly alert your emergency contacts with your live location
 
@@ -63,25 +46,11 @@ Hazard Reporting & Map View: Submit and view nearby hazards in real-time.
 
 Walk With Me: Match with a trusted buddy to walk with you
 
-## Tech Stack
-
-Frontend: React Native + Expo
-Backend: Firebase
-
-The app follows a modular architecture using Expo Router for navigation and Firebase for backend services. It’s divided into functional tabs:
-
-## File Structure
-
-- **Home Tab**: Buddy matching, hazard reporting
-- **Profile Tab**: Emergency contact management, volunteer sign-up
-- **Global Screens**: SOS trigger, map view, notifications
-
-##Core features (in details)
 ### ⚠️ Hazard Reporting
 
 The app includes a full-featured hazard reporting system to help users flag unsafe conditions in real time.
 
-#### Features:
+Features:
 - Interactive map with location selection
 - GPS-based autofill or manual tap
 - Hazard type selection (e.g. Poor Lighting, Suspicious Activity)
@@ -90,7 +59,7 @@ The app includes a full-featured hazard reporting system to help users flag unsa
 - Firebase Firestore integration for secure storage
 - Initial upvote from reporter; others can vote via `toggleUpvote()`
 
-#### UX Highlights:
+UX Highlights:
 - Responsive design with `KeyboardAvoidingView`
 - Real-time feedback via `ActivityIndicator`
 - Clear error messages for permission, validation, and submission issues
@@ -109,7 +78,7 @@ The `map.tsx` screen displays a live map of reported hazards using data from Fir
 
 Hazard data is fetched from the `hazardReports` collection and updated in real time. Upvotes are handled via atomic Firestore operations.
 
-### 🚨 SOS Page
+### 🚨 SOS System
 
 Quick access to emergency types:
 
@@ -136,18 +105,16 @@ The Emergency Voice Session is a real-time support feature designed for high-str
 ### 🧍‍♂️ Buddy Up System
 
 The `buddyUp.tsx` screen allows users to plan a safe walk by entering a starting location and destination. It supports:
-- Swapping locations
-- Using current location
-- Triggering a journey with safety features like:
-  - Real-time location sharing
-  - Buddy tracking
-  - Hazard alerts
+
+-Starting location and destination input
+-Swap and current location options
+-Safety features like real-time tracking, buddy sync, and hazard alerts
 
 This screen uses a reusable `LocationInput` component and integrates with future map or tracking logic. It’s designed for clarity, speed, and safety.
 
 #### 📋 Request Detail Screen
 
-This screen presents all relevant information about a buddy walk request and guides volunteers through the decision to accept or decline.
+Displays walk request info and volunteer decision flow.
 
 - Requester profile with rating and verification
 - Route, time, duration, and notes
@@ -155,7 +122,7 @@ This screen presents all relevant information about a buddy walk request and gui
 - Volunteer guidelines for respectful and safe conduct
 - Accept/Decline buttons with confirmation and navigation logic
 
-Accepting a request leads to the `OutfitPromptScreen`, where volunteers provide identification and meeting details.
+Accepting a request leads to the `OutfitPromptScreen`
 
 #### 👕 Outfit Prompt Screen
 
@@ -166,3 +133,15 @@ After accepting a buddy request, volunteers are prompted to provide:
 The screen includes quick suggestions, validation, and safety tips to ensure a smooth and secure meetup. Once submitted, both parties receive each other's contact info and can coordinate further.
 
 This step enhances trust and clarity in the buddy matching process.
+
+### 👤 Profile & Volunteer Management
+Manage emergency contacts and opt into the volunteer program.
+ 
+Volunteer Sign-Up (VolunteerSignUpForm.tsx)
+Allows users to become campus safety volunteers.
+
+Features:
+
+-Avatar selection via alert-based picker
+-Checkbox confirmation for intent and consent
+-Firestore update with volunteer status and timestamp
