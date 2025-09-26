@@ -55,9 +55,25 @@ To learn more about developing your project with Expo, look at the following res
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
+## Core features
 
-Join our community of developers creating universal apps.
+SOS Button: Instantly alert your emergency contacts with your live location
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Hazard Reporting & Map View: Submit and view nearby hazards in real-time.
+
+Walk With Me: Match with a trusted buddy to walk with you
+
+## Tech Stack
+
+Frontend: React Native + Expo
+Backend: Firebase
+
+The app follows a modular architecture using Expo Router for navigation and Firebase for backend services. It’s divided into functional tabs:
+
+## File Structure
+
+- **Home Tab**: Buddy matching, hazard reporting
+- **Profile Tab**: Emergency contact management, volunteer sign-up
+- **Global Screens**: SOS trigger, map view, notifications
+
+
