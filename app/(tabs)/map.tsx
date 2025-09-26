@@ -1,11 +1,13 @@
 import { StyleSheet, View, Alert, ActivityIndicator, TouchableOpacity, Text } from "react-native";
 import React, { useState, useCallback } from 'react';
-import MapView, { Region, Marker } from 'react-native-maps';
+import MapView, { Region, Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase.config';
+import { Ionicons } from '@expo/vector-icons';
+import { toggleUpvote } from './(home)/hazardReport';
 
 const LAT_ZOOM = 0.01, LONG_ZOOM = 0.01;
 
@@ -48,11 +50,23 @@ export default function mapPage() {
           hazardType: data.hazardType,
           severity: data.severity,
           description: data.description,
+          upvotes: data.upvotes || 0,
+          upvotedBy: data.upvotedBy || [],
         };
       });
       setHazardReports(reports);
     } catch (error) {
       console.error('Error fetching hazard reports:', error);
+    }
+  };
+
+  const handleUpvote = async (reportId: string, currentUpvotedBy: string[]) => {
+    try {
+      await toggleUpvote(reportId, currentUpvotedBy);
+      // Refresh the reports to get updated counts
+      await fetchHazardReports();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update upvote. Please try again.');
     }
   };
 
@@ -73,12 +87,12 @@ export default function mapPage() {
           'GuardU needs access to your location to show nearby safety information and your current position on the map.',
           [
             {
-              text: 'Cancel',
+              text: 'Use Default Location',
+              style: 'cancel',
               onPress: () => {
                 setRegion(fallbackRegion);
                 setLoading(false);
               },
-              style: 'cancel',
             },
             {
               text: 'Allow Location',
@@ -127,23 +141,6 @@ export default function mapPage() {
 
   const getCurrentLocation = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Location Permission Required',
-          'Please enable location services to show your current location on the map.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setRegion(fallbackRegion);
-                setLoading(false);
-              }
-            }
-          ]
-        );
-        return;
-      }
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
@@ -205,7 +202,20 @@ export default function mapPage() {
               report.severity === 'moderate' ? '#F59E0B' :
               '#10B981'
             }
-          />
+          >
+            {/* Custom callout with upvote button */}
+            <Callout onPress={() => handleUpvote(report.id, report.upvotedBy)}>
+              <View style={styles.calloutContainer}>
+                <Text style={styles.calloutTitle}>{report.hazardType}</Text>
+                <Text style={styles.calloutDescription}>{report.description}</Text>
+                <View style={styles.upvoteContainer}>
+                  <Ionicons name="thumbs-up" size={16} color="#666" />
+                  <Text style={styles.upvoteText}>{report.upvotes}</Text>
+                  <Text style={styles.upvoteAction}>Tap to upvote</Text>
+                </View>
+              </View>
+            </Callout>
+          </Marker>
         ))}
       </MapView>
 
@@ -249,5 +259,34 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  calloutContainer: {
+    width: 200,
+    padding: 10,
+  },
+  calloutTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  calloutDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 8,
+  },
+  upvoteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  upvoteText: {
+    marginLeft: 5,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  upvoteAction: {
+    marginLeft: 10,
+    fontSize: 12,
+    color: '#007AFF',
   },
 });

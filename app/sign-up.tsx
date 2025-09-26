@@ -19,6 +19,7 @@ import { auth, db } from '@/firebase.config';
 import { PublicRoute } from "@/components/publicRoute";
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { SessionManager } from "@/services/sessionManager";
+import { StatusBar } from 'expo-status-bar';
 
 
 interface InputFieldProps {
@@ -271,7 +272,8 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
-    <PublicRoute>
+  <PublicRoute>
+    <StatusBar style="dark" />
     <SafeAreaView className="flex-1 bg-gray-50">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

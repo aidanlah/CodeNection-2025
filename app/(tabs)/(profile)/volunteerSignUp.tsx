@@ -134,20 +134,10 @@ export default function VolunteerSignUpForm() {
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor="#F9FAFB" />
       
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-2 bg-white shadow-sm">
-        <TouchableOpacity onPress={handleGoBack} className="p-2">
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-lg font-semibold text-gray-900 mr-10">
-          Become a Volunteer
-        </Text>
-      </View>
-      
       <ScrollView 
         className="flex-1" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 0, paddingBottom: 40 }}
       >
         {/* Profile Picture Section */}
         <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
