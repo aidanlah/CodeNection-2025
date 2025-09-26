@@ -26,8 +26,8 @@ export default function HomeTab() {
 
       <View className="flex flex-col gap-2">
         <Button
-          title="BUDDY UP"
-          onPress={() => router.push("/buddyUp")}
+          title="WALK-WITH-ME"
+          onPress={() => router.push("/walkWithMe")}
         />
         <Button
           title="HAZARD REPORT"

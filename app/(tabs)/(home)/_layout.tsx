@@ -24,7 +24,7 @@ export default function () {
         <Stack.Screen 
           name="walkWithMe" 
           options={{
-            title: "walkWithMe", 
+            title: "Walk-With-Me", 
             headerBackTitle: "", 
           }}
         />
