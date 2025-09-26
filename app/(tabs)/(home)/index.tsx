@@ -27,11 +27,11 @@ export default function HomeTab() {
       <View className="flex flex-col gap-2">
         <Button
           title="WALK-WITH-ME"
-          onPress={() => router.push("./walkWithMe")}
+          onPress={() => router.push("/walkWithMe")}
         />
         <Button
           title="HAZARD REPORT"
-          onPress={() => router.push("./requestSuccess")}
+          onPress={() => router.push("./hazardReport")}
         />
       </View>
     </SafeAreaView>

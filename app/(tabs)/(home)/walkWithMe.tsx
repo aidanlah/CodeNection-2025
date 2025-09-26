@@ -19,7 +19,6 @@ import {
   addDoc,
   collection,
   GeoPoint,
-  getDocs,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/firebase.config";
@@ -90,7 +89,6 @@ export default function walkWithMePage() {
   const [region, setRegion] = useState<Region | null>(null);
   const [submitBuddyUp, setSubmitBuddyUp] = useState(false);
   const [submitTrack, setSubmitTrack] = useState(false);
-  const [requestId, setRequestId] = useState<String | null>(null);
 
   const fallbackRegion: Region = {
     latitude: 2.9278,
@@ -271,23 +269,12 @@ export default function walkWithMePage() {
 
       console.log("Submitting buddyup request:", buddyUp);
 
-      await addDoc(collection(db, "buddyUp"), buddyUp).then((docRef) => {
-        const requestId = docRef.id;
-        setRequestId(requestId);
-        console.log("Request ID:", requestId);
-      });
+      await addDoc(collection(db, "buddyUp"), buddyUp);
 
       Alert.alert("Request Submitted", "Waiting for volunteer", [
         {
           text: "OK",
-          onPress: () => {
-            router.push({
-              pathname: "./requestSuccess",
-              params: {
-                id: requestId,
-              },
-            } as any);
-          },
+          // onPress: () => router.back(),
         },
       ]);
     } catch (error: any) {
@@ -366,13 +353,6 @@ export default function walkWithMePage() {
     }
   };
 
-  const handleRequestSuccess = async () => {
-    try {
-      const query = await getDocs(collection(db, "buddyUp"));
-    } catch (error: any) {
-      console.error("Error in fetching data");
-    }
-  };
   if (loading || !region) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -406,67 +386,67 @@ export default function walkWithMePage() {
         )}
       </MapView>
 
-      <View className="w-full h-1/3 absolute bottom-2 rounded-t-[50px] bg-green-500 "></View>
-      <View className="w-full h-1/3 absolute bottom-0 bg-white rounded-t-[50px] z-40 flex-1 items-center justify-center">
-        <View className="flex flex-row gap-2">
-          <TouchableOpacity
-            className="w-32 border-2 rounded-[10px] p-[15] border-[#FFD66B] items-center"
-            onPress={useCurrent}
-          >
-            <Text className="text-gray-600 text-base">My location</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="w-32 border-2 rounded-[10px] p-[15] border-red-300 items-center"
-            onPress={clearMarkers}
-          >
-            <Text className="text-gray-600 text-base">Reset</Text>
-          </TouchableOpacity>
-        </View>
+<View className="w-full h-1/3 absolute bottom-2 rounded-t-[50px] bg-green-500 "></View>
+        <View className="w-full h-1/3 absolute bottom-0 bg-white rounded-t-[50px] z-40 flex-1 items-center justify-center">
+          <View className="flex flex-row gap-2">
+            <TouchableOpacity
+              className="w-32 border-2 rounded-[10px] p-[15] border-[#FFD66B] items-center"
+              onPress={useCurrent}
+            >
+              <Text className="text-gray-600 text-base">My location</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="w-32 border-2 rounded-[10px] p-[15] border-red-300 items-center"
+              onPress={clearMarkers}
+            >
+              <Text className="text-gray-600 text-base">Reset</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View className="flex flex-row gap-2 mt-5">
-          <TouchableOpacity
-            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
-            onPress={handleBuddyUp}
-            disabled={submitBuddyUp}
-          >
-            {submitBuddyUp ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <View className="flex-1 items-center justify-center w-full">
-                <Image
-                  source={require("@/assets/images/buddy.png")}
-                  className="w-3/4 h-3/4 rounded-3xl mb-1"
-                  resizeMode="cover"
-                ></Image>
-                <Text className="text-gray-600 text-base font-bold">
-                  BuddyUp
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View className="flex flex-row gap-2 mt-5">
+            <TouchableOpacity
+              className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+              onPress={handleBuddyUp}
+              disabled={submitBuddyUp}
+            >
+              {submitBuddyUp ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <View className="flex-1 items-center justify-center w-full">
+                  <Image
+                    source={require("@/assets/images/buddy.png")}
+                    className="w-3/4 h-3/4 rounded-3xl mb-1"
+                    resizeMode="cover"
+                  ></Image>
+                  <Text className="text-gray-600 text-base font-bold">
+                    BuddyUp
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
-            onPress={handleSafeTrack}
-            disabled={submitTrack}
-          >
-            {submitTrack ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <View className="flex-1 items-center justify-center w-full">
-                <Image
-                  source={require("@/assets/images/track.png")}
-                  className="w-3/4 h-3/4 rounded-3xl mb-1"
-                  resizeMode="cover"
-                ></Image>
-                <Text className="text-gray-600 text-base font-bold">
-                  Safe Track
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+              onPress={handleSafeTrack}
+              disabled={submitTrack}
+            >
+              {submitTrack ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <View className="flex-1 items-center justify-center w-full">
+                  <Image
+                    source={require("@/assets/images/track.png")}
+                    className="w-3/4 h-3/4 rounded-3xl mb-1"
+                    resizeMode="cover"
+                  ></Image>
+                  <Text className="text-gray-600 text-base font-bold">
+                    Safe Track
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
     </View>
   );
 }
