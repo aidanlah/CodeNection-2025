@@ -1,4 +1,5 @@
 import { auth, db } from "@/firebase.config";
+import { SessionManager } from "@/services/sessionManager";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -55,6 +56,7 @@ export default function ProfilePage() {
 
   const handleLogout = async (): Promise<void> => {
     try {
+      await SessionManager.clearSession();
       await signOut(auth);
       console.log("user logged out");
     } catch (error: any) {

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "@/firebase.config";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc , onSnapshot} from "firebase/firestore";
 
 interface EmergencyContact {
   id: string;
@@ -33,8 +33,20 @@ export default function EmergencyContactsPage() {
     relationship: ''
   });
 
-  useEffect(() => {
-  fetchContacts();
+useEffect(() => {
+  if (!auth.currentUser) return;
+
+  const contactsRef = collection(db, 'users', auth.currentUser.uid, 'emergencyContacts');
+  const unsubscribe = onSnapshot(contactsRef, (snapshot) => {
+    const contactsData = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as EmergencyContact[];
+    setContacts(contactsData);
+    setLoading(false); 
+  });
+
+  return () => unsubscribe();
 }, []);
 
 const fetchContacts = async () => {
@@ -116,9 +128,6 @@ const isFormModified = () => {
     setModalVisible(true);
   };
 
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [contactToDelete, setContactToDelete] = useState<EmergencyContact | null>(null);
-
   // Delete contact with confirmation
 const handleDeleteContact = (contact: EmergencyContact): void => {
   Alert.alert(
@@ -137,7 +146,6 @@ const handleDeleteContact = (contact: EmergencyContact): void => {
             const contactRef = doc(db, 'users', auth.currentUser?.uid || '', 'emergencyContacts', contact.id);
             await deleteDoc(contactRef);
             
-            setContacts(prev => prev.filter(c => c.id !== contact.id));
             Alert.alert("Success", `${contact.name} has been deleted`);
           } catch (error) {
             Alert.alert("Error", "Failed to delete contact");
@@ -172,13 +180,6 @@ const handleDeleteContact = (contact: EmergencyContact): void => {
       const contactRef = doc(db, 'users', auth.currentUser?.uid || '', 'emergencyContacts', editingContact.id);
       await updateDoc(contactRef, formData);
       
-      setContacts(prev => 
-        prev.map(contact => 
-          contact.id === editingContact.id 
-            ? { ...contact, ...formData }
-            : contact
-        )
-      );
     } else {
       // Add new contact
       const docRef = await addDoc(userContactsRef, formData);
@@ -186,7 +187,6 @@ const handleDeleteContact = (contact: EmergencyContact): void => {
         id: docRef.id,
         ...formData
       };
-      setContacts(prev => [...prev, newContact]);
     }
 
     setModalVisible(false);
