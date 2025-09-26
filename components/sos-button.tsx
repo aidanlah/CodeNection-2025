@@ -15,7 +15,9 @@ const SOSButton: React.FC<SOSButtonProps> = ({
 }) => {
   const handleSOSPress = (): void => {
     if (disabled) return;
-    router.push('/(tabs)/sos')
+    
+    // Navigate to SOS emergency type selection page
+    router.push('/(tabs)/sos');
     // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     
     if (onPress) {
