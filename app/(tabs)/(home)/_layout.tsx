@@ -7,9 +7,9 @@ export default function () {
     <SafeAreaProvider>
       <Stack screenOptions={{
         headerStyle: {
-          backgroundColor: '#16a34a', // Green header background
+          backgroundColor: '#16a34a',
         },
-        headerTintColor: '#ffffff', // White back button and text
+        headerTintColor: '#ffffff', 
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -22,18 +22,18 @@ export default function () {
           }}
         />
         <Stack.Screen 
-          name="buddyUp" 
+          name="walkWithMe" 
           options={{
-            title: "Buddy Up", // Custom title instead of "buddyUp"
-            headerBackTitle: "", // Remove back button text
+            title: "Walk-With-Me", 
+            headerBackTitle: "", 
           }}
         />
 
         <Stack.Screen 
           name="hazardReport" 
           options={{
-            title: "Hazard Report", // Custom title instead of "buddyUp"
-            headerBackTitle: "", // Remove back button text
+            title: "Hazard Report", 
+            headerBackTitle: "", 
           }}
         />
       </Stack>
