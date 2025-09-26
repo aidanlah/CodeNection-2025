@@ -22,6 +22,7 @@ To get started with the project:
 ```bash
 npm install
 npx expo start
+```
 
 ## 🧰 Tech Stack
 Frontend: React Native + Expo
