@@ -8,7 +8,7 @@ export default function HomeLayout() {
         
       }}>
       <Stack.Screen name="index" options={{ headerShown: false, animation: "slide_from_left" }}/>
-      <Stack.Screen name="buddyUp" />
+      <Stack.Screen name="walkWithMe" />
     </Stack>
     </SafeAreaProvider>
   );

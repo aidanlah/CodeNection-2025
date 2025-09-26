@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/firebase.config";
+import { useFocusEffect } from "@react-navigation/native";
 interface LocationInputProps {
   label: string;
   placeholder: string;
@@ -37,6 +38,7 @@ interface BuddyUp {
   hasVolunteer: boolean;
   status: string;
   userId: string;
+  type: string;
 }
 
 const LocationInput: React.FC<LocationInputProps> = ({
@@ -98,8 +100,9 @@ export default function walkWithMePage() {
   const checkLocationPermissionAndGetLocation = async () => {
     setLoading(true);
     try {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== "granted") {
+      const { status: currentStatus } =
+        await Location.getForegroundPermissionsAsync();
+      if (currentStatus !== "granted") {
         Alert.alert(
           "Location Access Required",
           "GuardU needs access to your location to show nearby safety information and your current position on the map.",
@@ -206,9 +209,11 @@ export default function walkWithMePage() {
     }
   };
 
-  useEffect(() => {
-    checkLocationPermissionAndGetLocation();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      checkLocationPermissionAndGetLocation();
+    }, [])
+  );
 
   const handleMapPress = (event: any) => {
     const { coordinate } = event.nativeEvent;
@@ -218,7 +223,6 @@ export default function walkWithMePage() {
     } else if (!destination) {
       setDestination(coordinate);
     } else {
-      // Reset both points
       setStartPoint(coordinate);
       setDestination(null);
     }
@@ -258,13 +262,14 @@ export default function walkWithMePage() {
         destination: dest,
         hasVolunteer: false,
         startLocation: start,
-        status: 'pending',
-        userId: auth.currentUser.uid
+        status: "pending",
+        userId: auth.currentUser.uid,
+        type: "buddyUp",
       };
 
       console.log("Submitting buddyup request:", buddyUp);
-      
-      await addDoc(collection(db, 'buddyUp'), buddyUp);
+
+      await addDoc(collection(db, "buddyUp"), buddyUp);
 
       Alert.alert("Request Submitted", "Waiting for volunteer", [
         {
@@ -272,9 +277,7 @@ export default function walkWithMePage() {
           // onPress: () => router.back(),
         },
       ]);
-
     } catch (error: any) {
-
       console.error("Error submitting request:", error.message);
       let errorMessage = "Failed to submit request. Please try again.";
       if (error.code === "permission-denied") {
@@ -285,10 +288,68 @@ export default function walkWithMePage() {
           "Invalid data provided. Please check all fields and try again.";
       }
       Alert.alert("Error", errorMessage);
-
     } finally {
-
       setSubmitBuddyUp(false);
+    }
+  };
+
+  const handleSafeTrack = async () => {
+    if (!startPoint) {
+      Alert.alert("Error", "Please pin a start point");
+      return;
+    }
+    if (!destination) {
+      Alert.alert("Error", "Please pin a destination");
+      return;
+    }
+    if (!auth.currentUser) {
+      Alert.alert("Error", "You must be logged in to report a hazard");
+      return;
+    }
+
+    setSubmitTrack(true);
+
+    try {
+      const start = new GeoPoint(startPoint.latitude, startPoint.longitude);
+      const dest = new GeoPoint(destination.latitude, destination.longitude);
+
+      const buddyUp: BuddyUp = {
+        createdAt: serverTimestamp(),
+        destination: dest,
+        hasVolunteer: false,
+        startLocation: start,
+        status: "pending",
+        userId: auth.currentUser.uid,
+        type: "safeTrack",
+      };
+
+      console.log("Submitting Safe Track request:", buddyUp);
+
+      await addDoc(collection(db, "buddyUp"), buddyUp);
+
+      Alert.alert(
+        "Request Submitted",
+        "Sharing location with trusted buddies",
+        [
+          {
+            text: "OK",
+            // onPress: () => router.back(),
+          },
+        ]
+      );
+    } catch (error: any) {
+      console.error("Error submitting request:", error.message);
+      let errorMessage = "Failed to submit request. Please try again.";
+      if (error.code === "permission-denied") {
+        errorMessage =
+          "Permission denied. Please check your login status and try again.";
+      } else if (error.code === "invalid-argument") {
+        errorMessage =
+          "Invalid data provided. Please check all fields and try again.";
+      }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setSubmitTrack(false);
     }
   };
 
@@ -349,7 +410,7 @@ export default function walkWithMePage() {
             {submitBuddyUp ? (
               <ActivityIndicator color="white" />
             ) : (
-              <View>
+              <View className="flex-1 items-center justify-center w-full">
                 <Image
                   source={require("@/assets/images/buddy.png")}
                   className="w-3/4 h-3/4 rounded-3xl mb-1"
@@ -361,18 +422,26 @@ export default function walkWithMePage() {
               </View>
             )}
           </TouchableOpacity>
+        
           <TouchableOpacity
             className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
-            // onPress={}
+            onPress={handleSafeTrack}
+            disabled={submitTrack}
           >
-            <Image
-              source={require("@/assets/images/track.png")}
-              className="w-3/4 h-3/4 rounded-3xl mb-1"
-              resizeMode="cover"
-            ></Image>
-            <Text className="text-gray-600 text-base font-bold">
-              Safe Track
-            </Text>
+            {submitTrack ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <View className="flex-1 items-center justify-center w-full">
+                <Image
+                  source={require("@/assets/images/track.png")}
+                  className="w-3/4 h-3/4 rounded-3xl mb-1"
+                  resizeMode="cover"
+                ></Image>
+                <Text className="text-gray-600 text-base font-bold">
+                  Safe Track
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
