@@ -29,7 +29,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/images/guardu.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -37,7 +37,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/guardu.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -46,13 +46,8 @@
           }
         }
       ],
-      "expo-secure-store"
-      // [
-      //   "react-native-maps",
-      //   {
-      //     "apiKey": "AIzaSyBdpEkzeISm695H1Sq7rZNfW8jQt4jl-Qk"
-      //   }
-      // ]
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

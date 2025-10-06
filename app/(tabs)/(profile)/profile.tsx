@@ -13,13 +13,13 @@ export default function ProfilePage() {
   
   // Mock user data - replace with your Firebase data fetching
   const [user, setUser] = useState({
-    displayName: "Wade Warren",
-    fullName: "Wade Warren",
+    displayName: "User name",
+    fullName: "User name",
     studentID: "Student number",
     profilePicture: null,
     emergencyContacts: [
       {
-        name: "John Doe Fleming",
+        name: "Example name",
         phone: "+60123456789",
         relationship: "Father"
       }
