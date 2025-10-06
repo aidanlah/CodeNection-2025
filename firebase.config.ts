@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket: "guardu-umonash.firebasestorage.app",
   messagingSenderId: "565397046611",
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
