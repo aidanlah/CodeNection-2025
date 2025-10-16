@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "firebase/auth";
-import { UserSession, AuthTokens, SessionData } from "../types/auth";
+import { UserSession, SessionData } from "../types/auth";
 
 const SESSION_KEYS = {
   USER_DATA: "userSession",
@@ -18,11 +18,6 @@ export class SessionManager {
       const sessionData: SessionData = {
         user: {
           uid: user.uid,
-          //   email: user.email,
-          //   displayName: user.displayName,
-          //   photoURL: user.photoURL,
-          //   emailVerified: user.emailVerified,
-        //   lastLogin: new Date().toISOString(),
         },
         tokens: {
           idToken,
@@ -60,7 +55,7 @@ export class SessionManager {
         (new Date().getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24);
 
       if (daysDiff > 7) {
-        console.log('manager: session expired')
+        console.log("manager: session expired");
         await this.clearSession();
         return null;
       }
@@ -80,7 +75,7 @@ export class SessionManager {
         SESSION_KEYS.AUTH_TOKENS,
         SESSION_KEYS.SESSION_TIMESTAMP,
       ]);
-      console.log('manager: clearing session')
+      console.log("manager: clearing session");
     } catch (error) {
       console.error("Error clearing session:", error);
       throw error;
