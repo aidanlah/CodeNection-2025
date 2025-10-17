@@ -9,13 +9,17 @@ import { db } from '@/firebase.config';
 import { Ionicons } from '@expo/vector-icons';
 import { toggleUpvote } from './(home)/hazardReport';
 
+// Map zoom levels for latitude and longitude
 const LAT_ZOOM = 0.01, LONG_ZOOM = 0.01;
 
+// mapPage: displays user's location and hazard reports on a map
 export default function mapPage() {
+  // Track current region, loading state, and hazard report data
   const [region, setRegion] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [hazardReports, setHazardReports] = useState<any[]>([]);
 
+  // Default region used when location access is denied
   const fallbackRegion: Region = {
     latitude: 2.9278,
     longitude: 101.6419,
@@ -23,6 +27,7 @@ export default function mapPage() {
     longitudeDelta: LONG_ZOOM,
   };
 
+  // Navigate to hazard report form with current location (if available)
   const handleReportHazard = () => {
     if (region) {
       router.push({
@@ -37,7 +42,7 @@ export default function mapPage() {
     }
   };
 
-  // Fetch hazard reports from Firestore
+  // Fetch hazard reports from Firestore and store in state
   const fetchHazardReports = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, 'hazardReports'));
@@ -60,6 +65,7 @@ export default function mapPage() {
     }
   };
 
+  // Toggle upvote for a hazard report and refresh data
   const handleUpvote = async (reportId: string, currentUpvotedBy: string[]) => {
     try {
       await toggleUpvote(reportId, currentUpvotedBy);
@@ -70,6 +76,7 @@ export default function mapPage() {
     }
   };
 
+  // When screen is focused, check location and fetch hazard data - when a screen is "focused" in React, it means the user is currently viewing and interacting with that screen
   useFocusEffect(
     useCallback(() => {
       checkLocationPermissionAndGetLocation();
@@ -77,6 +84,9 @@ export default function mapPage() {
     }, [])
   );
 
+  //Location permisson flow
+
+  // Check location permission and initialize map region
   const checkLocationPermissionAndGetLocation = async () => {
     setLoading(true);
     try {
@@ -112,6 +122,7 @@ export default function mapPage() {
     }
   };
 
+  // Request location permission from user
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -139,6 +150,7 @@ export default function mapPage() {
     }
   };
 
+  // Get user's current GPS location and update map region
   const getCurrentLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
@@ -170,6 +182,7 @@ export default function mapPage() {
     }
   };
 
+  // Show loading spinner while location or region is being initialized
   if (loading || !region) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -180,6 +193,7 @@ export default function mapPage() {
 
   return (
     <View style={styles.container}>
+      {/* MapView displays current region and hazard markers */}
       <MapView
         style={styles.map}
         region={region}
@@ -187,7 +201,7 @@ export default function mapPage() {
         showsMyLocationButton={true}
         followsUserLocation={true}
       >
-        {/* Render hazard report markers */}
+        {/* Render hazard report markers with severity-based pin color */}
         {hazardReports.map(report => (
           <Marker
             key={report.id}
@@ -219,6 +233,7 @@ export default function mapPage() {
         ))}
       </MapView>
 
+      {/** Floating button to report a new hazard */}
       <TouchableOpacity
         style={styles.reportButton}
         onPress={handleReportHazard}

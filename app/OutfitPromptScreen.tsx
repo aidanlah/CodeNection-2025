@@ -1,4 +1,4 @@
-// OutfitPromptScreen.tsx - Updated with complete workflow
+// OutfitPromptScreen.tsx - Handles volunteer outfit submission and meeting point confirmation
 import React, { useCallback, useState } from 'react';
 import {
   Alert,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
 
+// Route params passed from notification or request screen
 interface RouteParams {
   requestId?: string;
   notificationId?: string;
@@ -22,13 +23,15 @@ interface RouteParams {
 }
 
 const OutfitPromptScreen: React.FC = () => {
+  // Form state for outfit description and meeting point
   const [outfitDescription, setOutfitDescription] = useState<string>('');
   const [meetingPoint, setMeetingPoint] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Extract route parameters (e.g. requestId, userName)
   const route = useRoute();
   const params = route.params as RouteParams;
 
-  // Status bar configuration
+  // Configure status bar appearance on screen focus
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('light-content', true);
@@ -38,6 +41,7 @@ const OutfitPromptScreen: React.FC = () => {
     }, [])
   );
 
+  // Confirm before navigating back (cancels acceptance)
   const handleGoBack = (): void => {
     Alert.alert(
       'Cancel Request Accept',
@@ -56,6 +60,7 @@ const OutfitPromptScreen: React.FC = () => {
     );
   };
 
+  // Validate and submit outfit + meeting point
   const handleSubmitOutfit = async (): Promise<void> => {
     if (!outfitDescription.trim()) {
       Alert.alert('Description Required', 'Please describe what you\'ll be wearing so the user can recognize you.');
@@ -71,18 +76,12 @@ const OutfitPromptScreen: React.FC = () => {
 
     try {
       // Simulate API call to:
-      // 1. Send outfit description and meeting point to the requester
-      // 2. Remove the original walk request notification
-      // 3. Create a new "volunteer accepted" notification for the requester
+      // 1. Send outfit + meeting point to the requester
+      // 2. Remove the original notification
+      // 3. Create "volunteer accepted" notification
       // 4. Update the volunteer's notification to history
       
       await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // In a real app, you would:
-      // - Call API to update request status
-      // - Send notification to requester with volunteer details
-      // - Remove original notification from volunteer's alerts
-      // - Add acceptance confirmation to volunteer's history
 
       Alert.alert(
         'Request Accepted Successfully!',
@@ -105,7 +104,6 @@ const OutfitPromptScreen: React.FC = () => {
       );
 
       // Simulate the backend creating a notification for the requester
-      // This would normally be handled by your backend service
       simulateNotificationCreation();
 
     } catch (error) {
@@ -115,9 +113,8 @@ const OutfitPromptScreen: React.FC = () => {
     }
   };
 
+  // Simulated backend logic for notification updates
   const simulateNotificationCreation = () => {
-    // This simulates what your backend would do:
-    // Create a notification for the original requester
     console.log('Creating notification for requester:', {
       type: 'volunteer_accepted',
       volunteerOutfit: outfitDescription,
@@ -132,6 +129,7 @@ const OutfitPromptScreen: React.FC = () => {
     console.log('Adding to volunteer history: Request accepted');
   };
 
+  // Suggested outfit descriptions for quick selection
   const suggestedOutfits = [
     'Blue jacket, holding a green umbrella',
     'Red backpack, wearing glasses',
@@ -140,6 +138,7 @@ const OutfitPromptScreen: React.FC = () => {
     'Grey sweater, yellow cap'
   ];
 
+  // Suggested meeting points for quick selection
   const suggestedMeetingPoints = [
     'Main Library entrance',
     'Student Center lobby',
@@ -148,6 +147,7 @@ const OutfitPromptScreen: React.FC = () => {
     'Coffee shop on ground floor'
   ];
 
+  // Autofill handler for suggestion taps
   const handleSuggestionPress = (suggestion: string, type: 'outfit' | 'meeting') => {
     if (type === 'outfit') {
       setOutfitDescription(suggestion);
@@ -174,7 +174,10 @@ const OutfitPromptScreen: React.FC = () => {
       </View>
 
       <ScrollView className="flex-1 px-4 py-6">
-        {/* Success Message Card */}
+         {/* Success Message Card
+            - Confirms volunteer acceptance
+            - Prompts user to provide outfit and meeting details
+        */}
         <View className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-6">
           <View className="flex-row items-start">
             <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3 mt-1">
@@ -191,7 +194,10 @@ const OutfitPromptScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Outfit Description Input Card */}
+        {/* Outfit Description Input Card
+          - Text input for describing volunteer's appearance
+          - Includes character counter and quick suggestions
+      */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
           <Text className="text-lg font-bold text-gray-900 mb-4">What will you be wearing?</Text>
           
@@ -234,7 +240,10 @@ const OutfitPromptScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Meeting Point Input Card */}
+        {/* Meeting Point Input Card
+            - Text input for specifying where the volunteer will wait
+            - Includes character counter and quick suggestions
+        */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
           <Text className="text-lg font-bold text-gray-900 mb-4">Where will you wait?</Text>
           
@@ -277,7 +286,9 @@ const OutfitPromptScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Important Info Card */}
+        {/* Important Info Card
+          - Tips for visibility, safety, and coordination
+      */}
         <View className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg mb-6">
           <View className="flex-row items-start">
             <Ionicons name="information-circle" size={20} color="#F59E0B" className="mt-1" />
@@ -294,7 +305,10 @@ const OutfitPromptScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Submit Button */}
+        {/* Submit Button
+          - Disabled until both fields are filled
+          - Shows loading state while submitting
+      */}
         <TouchableOpacity
           onPress={handleSubmitOutfit}
           disabled={isSubmitting || !outfitDescription.trim() || !meetingPoint.trim()}
@@ -316,7 +330,10 @@ const OutfitPromptScreen: React.FC = () => {
             </Text>
           </View>
         </TouchableOpacity>
-
+        
+        {/* Post-submission Info
+          - Explains what happens after confirmation
+      */}
         <View className="mt-4 bg-gray-50 p-4 rounded-lg">
           <Text className="text-gray-600 text-sm text-center">
             After submitting, {params?.userName || 'the requester'} will receive a notification with your details. 

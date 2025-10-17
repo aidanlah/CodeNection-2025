@@ -7,8 +7,16 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
+/**
+ * Collapsible component
+ * - Displays a titled header that toggles visibility of its children
+ * - Useful for expandable sections like FAQs, filters, or nested content
+ */
+export function Collapsible({ children, title }: 
+  PropsWithChildren & { title: string }) {
+    // Tracks whether the collapsible section is expanded
   const [isOpen, setIsOpen] = useState(false);
+   // Determines current theme for dynamic styling
   const theme = useColorScheme() ?? 'light';
 
   return (
@@ -32,14 +40,15 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
   );
 }
 
+// Layout styles for header and content
 const styles = StyleSheet.create({
   heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    flexDirection: 'row',  // Horizontal layout for icon + title
+    alignItems: 'center',  // Vertically center items
+    gap: 6,                 // Space between icon and text
   },
   content: {
-    marginTop: 6,
-    marginLeft: 24,
+    marginTop: 6, // Space below header
+    marginLeft: 24, // Indent nested content
   },
 });
