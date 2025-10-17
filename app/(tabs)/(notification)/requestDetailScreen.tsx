@@ -74,7 +74,6 @@ const RequestDetailScreen: React.FC = () => {
           style: 'destructive',
           onPress: () => {
             // Remove the notification from the alerts
-            // This would typically involve calling an API and updating global state
             Alert.alert(
               'Request Declined',
               'The user has been notified that you cannot accept this request. The notification has been removed.',
@@ -84,8 +83,6 @@ const RequestDetailScreen: React.FC = () => {
                   onPress: () => {
                     // Navigate back to notifications with a flag to remove the notification
                     router.back();
-                    // In a real app, you'd dispatch an action to remove the notification
-                    // or call an API endpoint to update the notification status
                   },
                 },
               ]
@@ -104,7 +101,7 @@ const RequestDetailScreen: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       router.push({
-        pathname: '/OutfitPromptScreen',
+        pathname: '/outfitPromptScreen',
         params: {
         requestId: params?.requestId || request.id,
         notificationId: params?.notificationId,
@@ -142,20 +139,7 @@ const RequestDetailScreen: React.FC = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-green-600" style={{ paddingTop: StatusBar.currentHeight || 44 }}>
-        <View className="px-4 py-4">
-          <View className="flex-row items-center justify-between">
-            <TouchableOpacity onPress={handleGoBack} className="p-2">
-              <Ionicons name="chevron-back" size={24} color="white" />
-            </TouchableOpacity>
-            
-            <Text className="text-white text-lg font-semibold">Buddy Request</Text>
-            
-            <View className="p-2" />
-          </View>
-        </View>
-      </View>
+      
 
       <ScrollView className="flex-1 px-4 py-6">
         {/* Volunteer Notice Card */}
@@ -166,7 +150,7 @@ const RequestDetailScreen: React.FC = () => {
             </View>
             <View className="flex-1">
               <Text className="text-blue-800 font-bold text-lg mb-1">
-                Volunteer Request
+                Buddy Request
               </Text>
               <Text className="text-blue-700 text-sm leading-relaxed">
                 A student needs a buddy for a safe walk. Review the details below and accept if you're available to help.

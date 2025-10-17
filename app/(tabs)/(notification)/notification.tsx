@@ -252,7 +252,7 @@ const NotificationCenter: React.FC = () => {
           text: 'View Details',
           onPress: () => {
             router.push({
-              pathname: '/RequestDetailScreen',
+              pathname: '/requestDetailScreen',
               params: {
                 requestId: notification.requestId || 'req_001',
                 notificationId: notification.id,
