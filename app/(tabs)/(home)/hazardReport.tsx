@@ -1,3 +1,8 @@
+// HazardReportPage: Allows users to report safety hazards by selecting a location, hazard type, severity, and description.
+// Requires user authentication and location access (or fallback to default).
+// Submits structured report to Firestore with metadata and upvote tracking.
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -89,7 +94,7 @@ export default function HazardReportPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Status bar configuration
+  // Status bar configuration
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('light-content', true);
@@ -98,8 +103,6 @@ export default function HazardReportPage() {
       }
     }, [])
   );
-
-
 
   // Fallback region (MMU)
   const fallbackRegion: Region = {
@@ -113,7 +116,10 @@ export default function HazardReportPage() {
     initializeLocation();
   }, []);
 
-  // Add this updated initializeLocation function
+  // Initialize location based on:
+  // 1. Coordinates passed from another screen (e.g., map tab)
+  // 2. Current GPS location (if permission granted)
+  // 3. Fallback to MMU campus if location access is denied
   const initializeLocation = async () => {
     try {
       // If coordinates passed from map tab
@@ -137,6 +143,8 @@ export default function HazardReportPage() {
       // Check current location permission status
       const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
       
+      // Prompt user to grant location access or fallback to default region
+      // This ensures hazard reports are geotagged accurately
       if (currentStatus !== 'granted') {
         Alert.alert(
           'Location Access Required',
@@ -229,11 +237,18 @@ export default function HazardReportPage() {
     }
   };
 
+  // When user taps on the map, place a marker at the selected location
+  // This becomes the hazard's geolocation in the report
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setMarkerLocation({ latitude, longitude });
   };
 
+  // Validate all fields before submission:
+  // - Location must be selected
+  // - Hazard type and severity must be chosen
+  // - Description must be 10–1000 characters
+  // - User must be logged in
   const handleSubmitReport = async () => {
     if (!markerLocation) {
       Alert.alert('Error', 'Please select a location on the map');
@@ -272,6 +287,12 @@ export default function HazardReportPage() {
 
     setSubmitting(true);
 
+    // Construct hazardReport object with:
+    // - GeoPoint location
+    // - Metadata (type, severity, description)
+    // - Authenticated user ID
+    // - Timestamp and initial upvote
+
     try {
       const geoPoint = new GeoPoint(markerLocation.latitude, markerLocation.longitude);
 
@@ -288,6 +309,8 @@ export default function HazardReportPage() {
 
       console.log('Submitting hazard report:', hazardReport);
 
+      // Submit report to Firestore 'hazardReports' collection
+      // This enables community visibility and future upvoting
       await addDoc(collection(db, 'hazardReports'), hazardReport);
 
       Alert.alert(
@@ -300,6 +323,9 @@ export default function HazardReportPage() {
           },
         ]
       );
+      // Handle Firestore errors gracefully:
+      // - permission-denied → likely due to unauthenticated user
+      // - invalid-argument → malformed or missing data
     } catch (error: any) {
       console.error('Error submitting report:', error);
       console.error('Error code:', error.code);
@@ -341,6 +367,8 @@ export default function HazardReportPage() {
         >
           <Text style={styles.subtitle}>Tap on the map to select location:</Text>
           <View style={styles.mapContainer}>
+          {/* MapView displays current region and lets user tap to place marker
+          Marker is shown only if location is selected */}
             <MapView
               style={styles.map}
               region={region}
@@ -357,6 +385,7 @@ export default function HazardReportPage() {
             </MapView>
           </View>
 
+          {/* Hazard type selector: highlights selected type with green styling */}
           <Text style={styles.subtitle}>Hazard Type:</Text>
           <View style={styles.hazardTypeContainer}>
             {HAZARD_TYPES.map((type) => (
@@ -380,6 +409,7 @@ export default function HazardReportPage() {
             ))}
           </View>
 
+            {/* Severity selector: color-coded buttons with labels and descriptions */}
           <Text style={styles.subtitle}>Severity Level:</Text>
           <View style={styles.severityContainer}>
             {SEVERITY_LEVELS.map((severity) => (
@@ -416,6 +446,7 @@ export default function HazardReportPage() {
             ))}
           </View>
 
+            {/* Description input: multiline with character count and validation  */}
           <Text style={styles.subtitle}>Description:</Text>
           <TextInput
             style={styles.textInput}
@@ -431,6 +462,7 @@ export default function HazardReportPage() {
             {description.length}/1000 characters
           </Text>
 
+          {/* Submit button: disabled while submitting, shows loading spinner  */}
           <TouchableOpacity
             style={[styles.submitButton, submitting && styles.disabledButton]}
             onPress={handleSubmitReport}
@@ -443,6 +475,7 @@ export default function HazardReportPage() {
             )}
           </TouchableOpacity>
 
+          {/* Cancel button: navigates back without submitting */}
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => router.back()}
