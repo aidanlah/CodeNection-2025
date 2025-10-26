@@ -12,7 +12,7 @@ import {
 
 import { router } from 'expo-router';
 
-// Notification interface
+// Notification interface defines structure for alerts and history items 
 interface Notification {
   id: string;
   type: 'sos' | 'walk' | 'hazard' | 'completed' | 'volunteer_accepted';
@@ -116,6 +116,8 @@ const NotificationCenter: React.FC = () => {
     // For now, we'll simulate the workflow with state management
   }, []);
 
+  // Handle tab switch between 'alerts' and 'history'
+  // Updates the visible notifications based on selected tab and current filter
   const handleTabChange = (tab: TabType) => {
     try {
       setActiveTab(tab);
@@ -126,17 +128,22 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
+  // Handle filter change (e.g., 'sos', 'walk', 'hazard')
+  // Updates the visible notifications based on current tab and selected filter
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
     setShowFilterDropdown(false);
     updateNotifications(activeTab, filter);
   };
 
+  // Apply tab and filter to derive the visible notifications list
   const updateNotifications = (tab: TabType, filter: FilterType) => {
+    // Filter by tab category first
     let filteredNotifications = allNotifications.filter(
       notification => notification.category === tab
     );
 
+    // Apply type filter if not 'all'
     if (filter !== 'all') {
       filteredNotifications = filteredNotifications.filter(
         notification => notification.type === filter
@@ -146,12 +153,14 @@ const NotificationCenter: React.FC = () => {
     setNotifications(filteredNotifications);
   };
 
+  // Remove a notification by ID and refresh the visible list
   const removeNotification = (notificationId: string) => {
     const updatedNotifications = allNotifications.filter(n => n.id !== notificationId);
     setAllNotifications(updatedNotifications);
     updateNotifications(activeTab, activeFilter);
   };
 
+  // Add a new 'volunteer_accepted' notification and refresh the visible list
   const addVolunteerAcceptedNotification = (requestId: string, volunteerName: string, outfitDescription: string, meetingPoint: string) => {
     const newNotification: Notification = {
       id: `volunteer_accepted_${Date.now()}`,
@@ -238,11 +247,12 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
+  // Handle notification tap based on type and category
   const handleNotificationPress = (notification: Notification) => {
   // Handle walk request notifications for volunteers only
   if (notification.type === 'walk' && notification.category === 'alerts') {
-    // This should ideally check user type (volunteer vs requester)
-    // For now, we'll assume anyone clicking is a potential volunteer
+    // Ideally, this should check user role (volunteer vs requester)
+    // For now, we assume anyone clicking is a potential volunteer
     
     Alert.alert(
       'Walk Request',
@@ -252,7 +262,7 @@ const NotificationCenter: React.FC = () => {
           text: 'View Details',
           onPress: () => {
             router.push({
-              pathname: '/RequestDetailScreen',
+              pathname: '/requestDetailScreen',
               params: {
                 requestId: notification.requestId || 'req_001',
                 notificationId: notification.id,
@@ -315,6 +325,7 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
+  // Render a single notification card with dynamic styling based on type
   const renderNotificationItem = ({ item }: { item: Notification }) => {
     const style = getNotificationStyle(item.type);
     
@@ -376,6 +387,7 @@ const NotificationCenter: React.FC = () => {
     );
   };
 
+  /** Render empty state when no notifications are available */
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center px-6 py-20">
       <Ionicons

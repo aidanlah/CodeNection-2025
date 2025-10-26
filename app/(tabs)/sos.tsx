@@ -8,6 +8,7 @@ import Button from "@/components/button";
 export default function sosPage() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
+      {/** Vertical stack of SOS category buttons */}
       <View className="flex flex-col gap-5">
         <Button
           title="ROBBERY/THEFT"

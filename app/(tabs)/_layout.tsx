@@ -51,7 +51,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
                 return "home";
               case "map":
                 return "location-outline";
-              case "notification":
+              case "(notification)":
                 return "notifications-outline";
               case "(profile)":
                 return "person-outline";
@@ -122,7 +122,7 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="notification"
+          name="(notification)"
           options={{
             title: "Notification",
             tabBarLabel: "Notification",
