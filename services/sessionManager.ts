@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "firebase/auth";
 import { UserSession, AuthTokens, SessionData } from "../types/auth";
 
-// Define consistent keys for storing session-related data
 const SESSION_KEYS = {
   USER_DATA: "userSession",
   AUTH_TOKENS: "authTokens",
@@ -10,10 +9,7 @@ const SESSION_KEYS = {
 } as const;
 
 export class SessionManager {
-   /**
-   * Store complete session data in AsyncStorage
-   * Includes user ID, optional ID token, and timestamp
-   */
+  // Store complete session
   static async storeSession(
     user: User,
     idToken: string | null = null
@@ -22,12 +18,11 @@ export class SessionManager {
       const sessionData: SessionData = {
         user: {
           uid: user.uid,
-          /// Optional fields can be added here if needed:
-          // email: user.email,
-          // displayName: user.displayName,
-          // photoURL: user.photoURL,
-          // emailVerified: user.emailVerified,
-          // lastLogin: new Date().toISOString(),
+          //   email: user.email,
+          //   displayName: user.displayName,
+          //   photoURL: user.photoURL,
+          //   emailVerified: user.emailVerified,
+        //   lastLogin: new Date().toISOString(),
         },
         tokens: {
           idToken,
@@ -47,10 +42,7 @@ export class SessionManager {
     }
   }
 
-   /**
-   * Retrieve session data from AsyncStorage
-   * Returns null if not found or expired (after 7 days)
-   */
+  // Retrieve session
   static async getSession(): Promise<SessionData | null> {
     try {
       const session = await AsyncStorage.getItem(SESSION_KEYS.USER_DATA);
@@ -80,9 +72,7 @@ export class SessionManager {
     }
   }
 
-  /**
-   * Clear all session-related keys from AsyncStorage
-   */
+  // Clear session
   static async clearSession(): Promise<void> {
     try {
       await AsyncStorage.multiRemove([
@@ -97,17 +87,13 @@ export class SessionManager {
     }
   }
 
-   /**
-   * Check if a valid session exists
-   */
+  // Check if session exists
   static async hasValidSession(): Promise<boolean> {
     const session = await this.getSession();
     return session !== null;
   }
 
-  /**
-   * Retrieve only the user portion of the session - full ession SessionData includes : user, tokens, timestamp
-   */
+  // Get only user data
   static async getUserSession(): Promise<UserSession | null> {
     const session = await this.getSession();
     return session ? session.user : null;

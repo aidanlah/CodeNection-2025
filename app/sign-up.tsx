@@ -21,7 +21,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { SessionManager } from "@/services/sessionManager";
 import { StatusBar } from 'expo-status-bar';
 
-// Props for reusable input field component
+
 interface InputFieldProps {
   label: string;
   placeholder: string;
@@ -33,9 +33,6 @@ interface InputFieldProps {
   error?: string;
 }
 
-// Generate display ID using:
-// - First 4 characters of first name (padded if short)
-// - Last 4 digits of student ID
 const generateDisplayID = (fullName: string, studentID: string): string => {
   // Extract first name (everything before first space or comma)
   let firstName = fullName.split(/[\s,]+/)[0].toLowerCase();
@@ -54,8 +51,6 @@ const generateDisplayID = (fullName: string, studentID: string): string => {
   return namePrefix + idSuffix;
 };
 
-// Create Firestore user profile with metadata
-// Includes display ID, timestamps, and volunteer status
 const createUserProfile = async (user: any, formData: any) => {
   try {
     const displayID = generateDisplayID(formData.fullName, formData.studentID);
@@ -78,7 +73,6 @@ const createUserProfile = async (user: any, formData: any) => {
   }
 };
 
-// InputField: styled input with icon, error handling, and password toggle
 const InputField: React.FC<InputFieldProps> = ({
   label,
   placeholder,
@@ -135,9 +129,7 @@ const InputField: React.FC<InputFieldProps> = ({
   );
 };
 
-// SignUpPage: handles user registration, validation, and profile creation
 const SignUpPage: React.FC = () => {
-  // Form data and error tracking
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -156,8 +148,6 @@ const SignUpPage: React.FC = () => {
     confirmPassword?: string;
   }>({});
 
-  // Validate form fields before submission
-  // Checks for required fields, format, and password match
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
@@ -223,14 +213,13 @@ const SignUpPage: React.FC = () => {
       // Create user profile in Firestore
       await createUserProfile(user, formData);
 
-      // Store session token
+      // Store session
       const token = await getIdToken(user);
       await SessionManager.storeSession(user, token)
       console.log('Page: session stored')
 
       const displayID = generateDisplayID(formData.fullName, formData.studentID);
 
-      // Show success alert with display ID
       Alert.alert(
         "Account Created",
         `Welcome to GuardU! Your display ID is: ${displayID}`,
@@ -268,12 +257,10 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  // Navigate to sign-in screen
   const navigateToSignIn = (): void => {
     router.push({pathname: '/sign-in'});
   };
 
-  // Update form field and clear error if present
   const updateFormData = (
     field: keyof typeof formData,
     value: string
@@ -285,22 +272,17 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
-    // PublicRoute ensures this screen is only accessible to unauthenticated users
   <PublicRoute>
     <StatusBar style="dark" />
-    {/*  SafeAreaView ensures content doesn't overlap with notches/status bars */}
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/*  Adjust layout when keyboard is open (especially on iOS) */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        // Scrollable container for form and content
         <ScrollView
           className="flex-1 px-6"
           showsVerticalScrollIndicator={false}
         >
-          {/* Welcome message and icon */}
           <View className="items-center py-6">
             <View className="bg-green-600 p-4 rounded-full mb-4">
               <Ionicons name="person-add" size={32} color="#fff" />
@@ -313,7 +295,6 @@ const SignUpPage: React.FC = () => {
             </Text>
           </View>
 
-          {/* Form card with input fields and submit button */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
             <InputField
               label="Full Name"

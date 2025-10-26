@@ -10,22 +10,16 @@ import { auth } from "@/firebase.config";
 import { UserSession, AuthContextType } from "@/types/auth";
 import { SessionManager } from "@/services/sessionManager";
 
-// Create authentication context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Props for wrapping children in the provider
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // Firebase user object (optional, not used in session)
   const [user, setUser] = useState<User | null>(null);
-  // Custom session object used across app
   const [session, setSession] = useState<UserSession | null>(null);
-  // Track loading state during initialization
   const [loading, setLoading] = useState(true);
-  // Track whether user is authenticated
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Convert Firebase User to our UserSession
@@ -36,12 +30,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     let authUnsubscribe: (() => void) | null = null;
 
-    // Initialize authentication state
     const initializeAuth = async () => {
       try {
         console.log("initializing authentication");
 
-        // Check if user was previously authenticated in AsyncStorage
+        // Check if user was previously authenticated
         const storedSession = await SessionManager.getUserSession();
 
         if (storedSession) {
@@ -54,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.log("user not authenticated");
         }
 
-        // Set up Firebase listener to isten for auth state changes
+        // Set up Firebase auth state listener
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
           console.log(" firebase auth state changed");
           if (firebaseUser) {
@@ -80,7 +73,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Logout function: clears Firebase and local session
   const logout = async (): Promise<void> => {
     try {
       await signOut(auth);
@@ -92,7 +84,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // This is the auth data we share with screens that need it
   const value: AuthContextType = {
     user,
     session,
@@ -101,11 +92,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
   };
 
-  // Make this auth data available to all screens inside the app
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom function to let screens use the auth data easily
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {

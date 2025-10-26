@@ -1,11 +1,6 @@
 import { SymbolView, SymbolViewProps, SymbolWeight } from 'expo-symbols';
 import { StyleProp, ViewStyle } from 'react-native';
 
-/**
- * IconSymbol component
- * - Renders a symbol icon using expo-symbols
- * - Supports dynamic sizing, color, weight, and optional styling
- */
 export function IconSymbol({
   name,
   size = 24,

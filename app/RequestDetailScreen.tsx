@@ -1,4 +1,4 @@
-// RequestDetailScreen.tsx - Displays details of a buddy walk request and handles accept/decline actions
+// RequestDetailScreen.tsx - Updated with notification workflow
 import React, { useCallback, useState } from 'react';
 import {
   Alert,
@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
 
-// Request metadata passed via route or fetched from backend
 interface RequestDetails {
   id: string;
   userName: string;
@@ -30,7 +29,7 @@ interface RouteParams {
   notificationId?: string;
 }
 
-// Sample request
+// Sample request data
 const sampleRequest: RequestDetails = {
   id: 'req_001',
   userName: 'Sarah Chen',
@@ -57,12 +56,10 @@ const RequestDetailScreen: React.FC = () => {
     }, [])
   );
 
-  // Navigate back to previous screen
   const handleGoBack = (): void => {
     router.back();
   };
 
-  // Decline request with confirmation and simulated notification removal
   const handleDecline = (): void => {
     Alert.alert(
       'Decline Request',
@@ -76,7 +73,8 @@ const RequestDetailScreen: React.FC = () => {
           text: 'Decline',
           style: 'destructive',
           onPress: () => {
-            // Simulate notification removal and user feedback
+            // Remove the notification from the alerts
+            // This would typically involve calling an API and updating global state
             Alert.alert(
               'Request Declined',
               'The user has been notified that you cannot accept this request. The notification has been removed.',
@@ -84,8 +82,10 @@ const RequestDetailScreen: React.FC = () => {
                 {
                   text: 'OK',
                   onPress: () => {
+                    // Navigate back to notifications with a flag to remove the notification
                     router.back();
-                    // In production: dispatch action or call API to update notification status
+                    // In a real app, you'd dispatch an action to remove the notification
+                    // or call an API endpoint to update the notification status
                   },
                 },
               ]
@@ -96,17 +96,15 @@ const RequestDetailScreen: React.FC = () => {
     );
   };
 
-  // Accept request and navigate to outfit prompt screen
   const handleAccept = async (): Promise<void> => {
     setIsLoading(true);
     
     try {
-      // Simulate backend processing delay
+      // Simulate processing
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Navigate to outfit submission screen with request context
       router.push({
-        pathname: '/outfitPromptScreen',
+        pathname: '/OutfitPromptScreen',
         params: {
         requestId: params?.requestId || request.id,
         notificationId: params?.notificationId,
@@ -121,7 +119,6 @@ const RequestDetailScreen: React.FC = () => {
     }
   };
 
-  // Render star rating with full, half, and empty icons
   const renderStarRating = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -145,10 +142,23 @@ const RequestDetailScreen: React.FC = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      
+      {/* Header */}
+      <View className="bg-green-600" style={{ paddingTop: StatusBar.currentHeight || 44 }}>
+        <View className="px-4 py-4">
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity onPress={handleGoBack} className="p-2">
+              <Ionicons name="chevron-back" size={24} color="white" />
+            </TouchableOpacity>
+            
+            <Text className="text-white text-lg font-semibold">Buddy Request</Text>
+            
+            <View className="p-2" />
+          </View>
+        </View>
+      </View>
 
       <ScrollView className="flex-1 px-4 py-6">
-        {/* Volunteer Notice Card - Explains purpose of the request */}
+        {/* Volunteer Notice Card */}
         <View className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
           <View className="flex-row items-start">
             <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3 mt-1">
@@ -156,7 +166,7 @@ const RequestDetailScreen: React.FC = () => {
             </View>
             <View className="flex-1">
               <Text className="text-blue-800 font-bold text-lg mb-1">
-                Buddy Request
+                Volunteer Request
               </Text>
               <Text className="text-blue-700 text-sm leading-relaxed">
                 A student needs a buddy for a safe walk. Review the details below and accept if you're available to help.
@@ -165,7 +175,7 @@ const RequestDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* User Info Card  - Displays requester name, rating, and verification status */}
+        {/* User Info Card */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
           <View className="flex-row items-center mb-4">
             <View className="w-16 h-16 bg-green-100 rounded-full items-center justify-center mr-4">
@@ -187,7 +197,7 @@ const RequestDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Request Details Card - Displays time, route, duration, and special notes */}
+        {/* Request Details Card */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
           <Text className="text-lg font-bold text-gray-900 mb-4">Request Details</Text>
           
@@ -228,10 +238,7 @@ const RequestDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Safety Features Card 
-            - Highlights active safety protocols during the walk
-            - Reassures volunteers and requesters of built-in protections
-        */}
+        {/* Safety Features Card */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
           <Text className="text-lg font-bold text-gray-900 mb-4">Safety Features Active</Text>
           
@@ -258,10 +265,7 @@ const RequestDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Volunteer Responsibilities Card 
-            - Sets expectations for behavior and safety
-            - Reinforces accountability and respectful conduct
-        */}
+        {/* Volunteer Responsibilities Card */}
         <View className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg mb-6">
           <View className="flex-row items-start">
             <Ionicons name="alert-circle" size={20} color="#F59E0B" className="mt-1" />
@@ -278,7 +282,7 @@ const RequestDetailScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Action Buttons - Decline or Accept */}
+        {/* Action Buttons */}
         <View className="flex-row space-x-3">
           <TouchableOpacity
             onPress={handleDecline}
@@ -312,7 +316,7 @@ const RequestDetailScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Bottom Info Card - Confirms location sharing and safety commitment */}
+        {/* Bottom Info Card */}
         <View className="mt-4 bg-gray-50 p-4 rounded-lg">
           <Text className="text-gray-600 text-sm text-center">
             By accepting this request, you agree to help ensure a safe walk for your fellow student. 

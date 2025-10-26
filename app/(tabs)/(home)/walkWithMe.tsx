@@ -19,12 +19,11 @@ import {
   addDoc,
   collection,
   GeoPoint,
+  getDocs,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/firebase.config";
 import { useFocusEffect } from "@react-navigation/native";
-
-// Props for reusable location input component
 interface LocationInputProps {
   label: string;
   placeholder: string;
@@ -33,7 +32,6 @@ interface LocationInputProps {
   iconName: keyof typeof Ionicons.glyphMap;
 }
 
-// Data model for BuddyUp request stored in Firestore
 interface BuddyUp {
   createdAt: any;
   destination: GeoPoint;
@@ -44,8 +42,6 @@ interface BuddyUp {
   type: string;
 }
 
-// Reusable input field with icon, label, and styled container
-// Used for entering location names or descriptions
 const LocationInput: React.FC<LocationInputProps> = ({
   label,
   placeholder,
@@ -74,14 +70,10 @@ const LocationInput: React.FC<LocationInputProps> = ({
   );
 };
 
-// Map zoom levels for latitude and longitude
 const LAT_ZOOM = 0.01,
   LONG_ZOOM = 0.01;
 
-// walkWithMePage: lets users pin start and destination points on a map
-// Submits a BuddyUp request to Firestore with location metadata
 export default function walkWithMePage() {
-  // Track current location, pinned points, map region, and submission states
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -98,8 +90,8 @@ export default function walkWithMePage() {
   const [region, setRegion] = useState<Region | null>(null);
   const [submitBuddyUp, setSubmitBuddyUp] = useState(false);
   const [submitTrack, setSubmitTrack] = useState(false);
+  const [requestId, setRequestId] = useState<String | null>(null);
 
-  // Default map region (MMU campus) used when location access is denied
   const fallbackRegion: Region = {
     latitude: 2.9278,
     longitude: 101.6419,
@@ -107,8 +99,6 @@ export default function walkWithMePage() {
     longitudeDelta: LONG_ZOOM,
   };
 
-  // Check location permission and initialize map region
-  // Prompts user to allow access or fallback to default
   const checkLocationPermissionAndGetLocation = async () => {
     setLoading(true);
     try {
@@ -145,8 +135,6 @@ export default function walkWithMePage() {
     }
   };
 
-  // Request location permission from user
-  // If granted, fetch current GPS location
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -174,8 +162,6 @@ export default function walkWithMePage() {
     }
   };
 
-  // Get user's current GPS location and update map region
-  // Falls back to default if location fails
   const getCurrentLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -225,41 +211,34 @@ export default function walkWithMePage() {
     }
   };
 
-  // Run location check every time screen comes into focus
   useFocusEffect(
     useCallback(() => {
       checkLocationPermissionAndGetLocation();
     }, [])
   );
 
-  // Handle map taps to place start and destination markers
-  // Resets if both are already placed
   const handleMapPress = (event: any) => {
     const { coordinate } = event.nativeEvent;
 
     if (!startPoint) {
-      setStartPoint(coordinate); // First tap → set start point
+      setStartPoint(coordinate);
     } else if (!destination) {
-      setDestination(coordinate);  // Second tap → set destination
+      setDestination(coordinate);
     } else {
-      setStartPoint(coordinate); // Third tap → reset: new start point
-      setDestination(null); // Clear old destination
+      setStartPoint(coordinate);
+      setDestination(null);
     }
   };
 
-  // Use current GPS location as start point
   const useCurrent = () => {
     setStartPoint(location);
   };
 
-  // Clear both markers from the map
   const clearMarkers = () => {
     setStartPoint(null);
     setDestination(null);
   };
 
-  // Submit BuddyUp request to Firestore
-  // Includes start/destination GeoPoints and user metadata
   const handleBuddyUp = async () => {
     if (!startPoint) {
       Alert.alert("Error", "Please pin a start point");
@@ -292,17 +271,25 @@ export default function walkWithMePage() {
 
       console.log("Submitting buddyup request:", buddyUp);
 
-      await addDoc(collection(db, "buddyUp"), buddyUp);
+      await addDoc(collection(db, "buddyUp"), buddyUp).then((docRef) => {
+        const requestId = docRef.id;
+        setRequestId(requestId);
+        console.log("Request ID:", requestId);
+      });
 
       Alert.alert("Request Submitted", "Waiting for volunteer", [
         {
           text: "OK",
-          // onPress: () => router.back(),
+          onPress: () => {
+            router.push({
+              pathname: "./requestSuccess",
+              params: {
+                id: requestId,
+              },
+            } as any);
+          },
         },
       ]);
-      // Handle Firestore errors gracefully:
-      // - permission-denied → user not logged in
-      // - invalid-argument → missing or malformed data
     } catch (error: any) {
       console.error("Error submitting request:", error.message);
       let errorMessage = "Failed to submit request. Please try again.";
@@ -319,10 +306,7 @@ export default function walkWithMePage() {
     }
   };
 
-  // Submit Safe Track request to Firestore
-  // Includes start/destination GeoPoints and user metadata
   const handleSafeTrack = async () => {
-    // Validate required fields before submitting
     if (!startPoint) {
       Alert.alert("Error", "Please pin a start point");
       return;
@@ -339,11 +323,9 @@ export default function walkWithMePage() {
     setSubmitTrack(true);
 
     try {
-      // Convert coordinates to Firestore GeoPoints
       const start = new GeoPoint(startPoint.latitude, startPoint.longitude);
       const dest = new GeoPoint(destination.latitude, destination.longitude);
 
-      // Construct Safe Track request object
       const buddyUp: BuddyUp = {
         createdAt: serverTimestamp(),
         destination: dest,
@@ -358,7 +340,6 @@ export default function walkWithMePage() {
 
       await addDoc(collection(db, "buddyUp"), buddyUp);
 
-      // Confirmation alert
       Alert.alert(
         "Request Submitted",
         "Sharing location with trusted buddies",
@@ -381,11 +362,17 @@ export default function walkWithMePage() {
       }
       Alert.alert("Error", errorMessage);
     } finally {
-      setSubmitTrack(false);// Re-enable button after submission
+      setSubmitTrack(false);
     }
   };
 
-  // Show loading spinner while location or region is being initialized
+  const handleRequestSuccess = async () => {
+    try {
+      const query = await getDocs(collection(db, "buddyUp"));
+    } catch (error: any) {
+      console.error("Error in fetching data");
+    }
+  };
   if (loading || !region) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -395,13 +382,9 @@ export default function walkWithMePage() {
   }
   return (
     <View className=" relative flex-1 items-center">
-      {/* Floating instruction bubble at top of screen
-        Informs user to tap on the map to place pins */}
       <View className="p-[15] absolute bg-white z-40 top-[5px] rounded-full justify-center items-center ">
         <Text className="">Tap on map</Text>
       </View>
-       {/* MapView shows current region and listens for user taps to place markers
-      Displays "Start Point" and "Destination" markers based on user input */}
       <MapView
         style={styles.map}
         region={region}
@@ -423,74 +406,67 @@ export default function walkWithMePage() {
         )}
       </MapView>
 
-<View className="w-full h-1/3 absolute bottom-2 rounded-t-[50px] bg-green-500 "></View>
-      {/* Bottom sheet with action buttons and location controls */}
-        <View className="w-full h-1/3 absolute bottom-0 bg-white rounded-t-[50px] z-40 flex-1 items-center justify-center">
-        {/*  "My location" button sets startPoint to current GPS location
-         "Reset" button clears both startPoint and destination markers */}
-          <View className="flex flex-row gap-2">
-            <TouchableOpacity
-              className="w-32 border-2 rounded-[10px] p-[15] border-[#FFD66B] items-center"
-              onPress={useCurrent}
-            >
-              <Text className="text-gray-600 text-base">My location</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-32 border-2 rounded-[10px] p-[15] border-red-300 items-center"
-              onPress={clearMarkers}
-            >
-              <Text className="text-gray-600 text-base">Reset</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex flex-row gap-2 mt-5">
-            {/*  BuddyUp button: submits a request for a walking companion
-             Shows loading spinner while submitting */}
-            <TouchableOpacity
-              className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
-              onPress={handleBuddyUp}
-              disabled={submitBuddyUp}
-            >
-              {submitBuddyUp ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <View className="flex-1 items-center justify-center w-full">
-                  <Image
-                    source={require("@/assets/images/buddy.png")}
-                    className="w-3/4 h-3/4 rounded-3xl mb-1"
-                    resizeMode="cover"
-                  ></Image>
-                  <Text className="text-gray-600 text-base font-bold">
-                    BuddyUp
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-              {/* Safe Track button: shares location with trusted buddies
-            Shows loading spinner while submitting */}
-            <TouchableOpacity
-              className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
-              onPress={handleSafeTrack}
-              disabled={submitTrack}
-            >
-              {submitTrack ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <View className="flex-1 items-center justify-center w-full">
-                  <Image
-                    source={require("@/assets/images/track.png")}
-                    className="w-3/4 h-3/4 rounded-3xl mb-1"
-                    resizeMode="cover"
-                  ></Image>
-                  <Text className="text-gray-600 text-base font-bold">
-                    Safe Track
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+      <View className="w-full h-1/3 absolute bottom-2 rounded-t-[50px] bg-green-500 "></View>
+      <View className="w-full h-1/3 absolute bottom-0 bg-white rounded-t-[50px] z-40 flex-1 items-center justify-center">
+        <View className="flex flex-row gap-2">
+          <TouchableOpacity
+            className="w-32 border-2 rounded-[10px] p-[15] border-[#FFD66B] items-center"
+            onPress={useCurrent}
+          >
+            <Text className="text-gray-600 text-base">My location</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="w-32 border-2 rounded-[10px] p-[15] border-red-300 items-center"
+            onPress={clearMarkers}
+          >
+            <Text className="text-gray-600 text-base">Reset</Text>
+          </TouchableOpacity>
         </View>
+
+        <View className="flex flex-row gap-2 mt-5">
+          <TouchableOpacity
+            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+            onPress={handleBuddyUp}
+            disabled={submitBuddyUp}
+          >
+            {submitBuddyUp ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <View className="flex-1 items-center justify-center w-full">
+                <Image
+                  source={require("@/assets/images/buddy.png")}
+                  className="w-3/4 h-3/4 rounded-3xl mb-1"
+                  resizeMode="cover"
+                ></Image>
+                <Text className="text-gray-600 text-base font-bold">
+                  BuddyUp
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="size-32 bg-[#DDF4E7] rounded-[10px] p-[15] border-gray-500 items-center justify-center"
+            onPress={handleSafeTrack}
+            disabled={submitTrack}
+          >
+            {submitTrack ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <View className="flex-1 items-center justify-center w-full">
+                <Image
+                  source={require("@/assets/images/track.png")}
+                  className="w-3/4 h-3/4 rounded-3xl mb-1"
+                  resizeMode="cover"
+                ></Image>
+                <Text className="text-gray-600 text-base font-bold">
+                  Safe Track
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }

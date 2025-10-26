@@ -11,10 +11,8 @@ import { ThemedView } from '@/components/themed-view';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-// Fixed height for the parallax header
 const HEADER_HEIGHT = 250;
 
-// Props: accepts a header image and background colors for light/dark mode
 type Props = PropsWithChildren<{
   headerImage: ReactElement;
   headerBackgroundColor: { dark: string; light: string };
@@ -25,20 +23,14 @@ export default function ParallaxScrollView({
   headerImage,
   headerBackgroundColor,
 }: Props) {
-  // Get themed background color and current color scheme
   const backgroundColor = useThemeColor({}, 'background');
   const colorScheme = useColorScheme() ?? 'light';
-
-  // Create animated scroll reference and track scroll offset
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
-
-  // Apply animated transform to header based on scroll position
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          // Translate header vertically for parallax effect
           translateY: interpolate(
             scrollOffset.value,
             [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
@@ -46,7 +38,6 @@ export default function ParallaxScrollView({
           ),
         },
         {
-          // Scale header image slightly when pulled down
           scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
         },
       ],
@@ -54,13 +45,10 @@ export default function ParallaxScrollView({
   });
 
   return (
-    // Scrollable container with animated header and content
     <Animated.ScrollView
       ref={scrollRef}
       style={{ backgroundColor, flex: 1 }}
-      scrollEventThrottle={16}> {/* Smooth scroll updates */}
-
-      {/** Animated header with dynamic background and transform */}
+      scrollEventThrottle={16}>
       <Animated.View
         style={[
           styles.header,
@@ -69,8 +57,6 @@ export default function ParallaxScrollView({
         ]}>
         {headerImage}
       </Animated.View>
-
-      {/** Scrollable content area below the header */}
       <ThemedView style={styles.content}>{children}</ThemedView>
     </Animated.ScrollView>
   );
@@ -82,7 +68,7 @@ const styles = StyleSheet.create({
   },
   header: {
     height: HEADER_HEIGHT,
-    overflow: 'hidden', // Prevent image overflow during transform
+    overflow: 'hidden',
   },
   content: {
     flex: 1,

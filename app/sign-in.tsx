@@ -26,7 +26,6 @@ import { PublicRoute } from "@/components/publicRoute";
 import { SessionManager } from "@/services/sessionManager";
 import { StatusBar } from 'expo-status-bar';
 
-// Props for reusable input field component
 interface InputFieldProps {
   label: string;
   placeholder: string;
@@ -38,8 +37,6 @@ interface InputFieldProps {
   error?: string;
 }
 
-// Update user's last login timestamp in Firestore
-// Called after successful sign-in
 const updateLastLoginTime = async (userId: string) => {
   try {
     console.log("Attempting to update last login for user:", userId);
@@ -63,7 +60,6 @@ const updateLastLoginTime = async (userId: string) => {
   }
 };
 
-// InputField: styled input with icon, error handling, and password toggle
 const InputField: React.FC<InputFieldProps> = ({
   label,
   placeholder,
@@ -120,9 +116,7 @@ const InputField: React.FC<InputFieldProps> = ({
   );
 };
 
-// SignInPage: handles user login, validation, session storage, and password reset
 const SignInPage: React.FC = () => {
-  // Track email, password, loading state, and validation errors
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -130,11 +124,9 @@ const SignInPage: React.FC = () => {
     {}
   );
 
-    // Calculate logo size based on screen width - responsive sizing
   const { width } = Dimensions.get("window");
-  const imageSize = Math.min(width * 0.6, 200); 
+  const imageSize = Math.min(width * 0.6, 200); // Responsive sizing
 
-  // Validate email and password before sign-in
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
 
@@ -156,12 +148,11 @@ const SignInPage: React.FC = () => {
   };
 
   const handleSignIn = async (): Promise<void> => {
-    // Validate form
     if (!validateForm()) return;
 
     setLoading(true);
     try {
-      // Authenticate with Firebase
+      // Auth with Firebase
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -172,7 +163,7 @@ const SignInPage: React.FC = () => {
       // Update last login time
       await updateLastLoginTime(user.uid);
 
-      // Store session token
+      // Store session
       const token = await getIdToken(user);
       await SessionManager.storeSession(user, token);
       console.log("page: session stored");
@@ -211,7 +202,6 @@ const SignInPage: React.FC = () => {
     }
   };
 
-  // Send password reset email if email is provided
   const handleForgotPassword = async (): Promise<void> => {
     if (!email.trim()) {
       Alert.alert("Email Required", "Please enter your email address first");
@@ -246,23 +236,19 @@ const SignInPage: React.FC = () => {
   };
 
   return (
-    // PublicRoute ensures this screen is only accessible to unauthenticated users
   <PublicRoute>
     <StatusBar style="dark" />
-    {/* SafeAreaView ensures content doesn't overlap with notches/status bars */}
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Adjust layout when keyboard is open */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        {/*  Scrollable container for logo and form */}
           <ScrollView
             className="flex-1 px-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 50 }}
           >
-            {/* Logo Section & Welcome message - Fixed container with proper spacing */}
+            {/* Logo Section - Fixed container with proper spacing */}
             <View className="items-center py-6 mt-4">
               <View
                 className="items-center justify-center"
@@ -304,7 +290,6 @@ const SignInPage: React.FC = () => {
                 error={errors.password}
               />
 
-              {/* Forgot Password link: triggers password reset flow */}
               <TouchableOpacity
                 onPress={handleForgotPassword}
                 className="self-end mb-6"
@@ -314,8 +299,7 @@ const SignInPage: React.FC = () => {
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
-              
-              {/* Sign In button: triggers login flow and shows loading spinner */}
+
               <TouchableOpacity
                 onPress={handleSignIn}
                 disabled={loading}
@@ -334,7 +318,7 @@ const SignInPage: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Sign Up link: navigates to registration screen */}
+            {/* Sign Up Link */}
             <View className="flex-row justify-center items-center mb-8">
               <Text className="text-gray-600 text-base">
                 Don't have an account?{" "}

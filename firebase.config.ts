@@ -4,13 +4,13 @@ import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/aut
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC2Am4RLNpn3t5sHoM84luhy2TiVHsZqzg",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "guardu-umonash.firebaseapp.com",
   projectId: "guardu-umonash",
   storageBucket: "guardu-umonash.firebasestorage.app",
   messagingSenderId: "565397046611",
-  appId: "1:565397046611:web:337de022989d89af85cda6",
-  measurementId: "G-R3HTE8EQ21"
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

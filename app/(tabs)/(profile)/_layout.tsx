@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function ProfileLayout() {
+export default function HomeLayout() {
   return (
     <SafeAreaProvider>
       <Stack screenOptions={{}}>
@@ -20,7 +20,7 @@ export default function ProfileLayout() {
               backgroundColor: '#16a34a',
             },
             headerTintColor: 'white',
-            headerBackTitle: '',
+            headerBackTitle: '', // Correct way to hide the title
             headerTitle: 'Emergency Contacts',
             animation: "slide_from_right"
           }}
@@ -33,7 +33,7 @@ export default function ProfileLayout() {
               backgroundColor: '#16a34a',
             },
             headerTintColor: 'white',
-            headerBackTitle: '', 
+            headerBackTitle: '', // Correct way to hide the title
             headerTitle: 'Volunteer Sign Up',
             animation: "slide_from_right"
           }}
