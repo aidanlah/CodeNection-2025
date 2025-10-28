@@ -1,15 +1,8 @@
 # CodeNection-2025
 Track: Campus Management 
-Problem statement: Campus safety app
+Problem statement: 
+Current safety infrastructure often lacks comprehensive coverage, real-time responsiveness, and accessibility features that address the diverse needs of the campus community, leaving gaps in protection and support.
 
-Figma:
-https://www.figma.com/design/mLcpUZ3HdWBvbSxGnIXSOA/Untitled?node-id=0-1&t=fzLYqizRUc6nplVl-1
-
-Presentation slides:
-https://docs.google.com/presentation/d/1eDKEIi2O5Syw7v9Hz6t9k_gjS3hCp5SD/edit?usp=sharing&ouid=113214149090892789609&rtpof=true&sd=true
-
-YouTube: 
-https://youtu.be/k-touAUszq8?si=WPy-iBYMNaCJjCP_
 
 # Welcome to your GUARDU 👋
 
@@ -146,3 +139,12 @@ Features:
 -Avatar selection via alert-based picker
 -Checkbox confirmation for intent and consent
 -Firestore update with volunteer status and timestamp
+
+## Demo and presentation
+Figma: [Guardu-figma](https://www.figma.com/design/mLcpUZ3HdWBvbSxGnIXSOA/Untitled?node-id=0-1&t=fzLYqizRUc6nplVl-1)
+
+Presentation slides:
+https://docs.google.com/presentation/d/1eDKEIi2O5Syw7v9Hz6t9k_gjS3hCp5SD/edit?usp=sharing&ouid=113214149090892789609&rtpof=true&sd=true
+
+YouTube: 
+https://youtu.be/k-touAUszq8?si=WPy-iBYMNaCJjCP_
