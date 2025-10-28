@@ -1,5 +1,6 @@
 # CodeNection-2025
 Track: Campus Management 
+
 Problem statement: 
 Current safety infrastructure often lacks comprehensive coverage, real-time responsiveness, and accessibility features that address the diverse needs of the campus community, leaving gaps in protection and support.
 
@@ -98,7 +99,7 @@ The Emergency Voice Session is a real-time support feature designed for high-str
 
 ### 🧍‍♂️ Buddy Up System
 
-The `buddyUp.tsx` screen allows users to plan a safe walk by entering a starting location and destination. It supports:
+The `buddyUp` page allows users to plan a safe walk by entering a starting location and destination. It supports:
 
 -Starting location and destination input
 -Swap and current location options
@@ -143,8 +144,6 @@ Features:
 ## Demo and presentation
 Figma: [Guardu-figma](https://www.figma.com/design/mLcpUZ3HdWBvbSxGnIXSOA/Untitled?node-id=0-1&t=fzLYqizRUc6nplVl-1)
 
-Presentation slides:
-https://docs.google.com/presentation/d/1eDKEIi2O5Syw7v9Hz6t9k_gjS3hCp5SD/edit?usp=sharing&ouid=113214149090892789609&rtpof=true&sd=true
+Presentation slides: [Guardu-slides](https://docs.google.com/presentation/d/1eDKEIi2O5Syw7v9Hz6t9k_gjS3hCp5SD/edit?usp=sharing&ouid=113214149090892789609&rtpof=true&sd=true)
 
-YouTube: 
-https://youtu.be/k-touAUszq8?si=WPy-iBYMNaCJjCP_
+YouTube: [Guardu-presentation](https://youtu.be/k-touAUszq8?si=WPy-iBYMNaCJjCP_)
