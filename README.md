@@ -122,9 +122,9 @@ Allows users to become campus safety volunteers.
 
 Features:
 
--Avatar selection via alert-based picker
--Checkbox confirmation for intent and consent
--Firestore update with volunteer status and timestamp
+- Avatar selection via alert-based picker
+- Checkbox confirmation for intent and consent
+- Firestore update with volunteer status and timestamp
 
 ## Demo and presentation
 Figma: [Guardu-figma](https://www.figma.com/design/mLcpUZ3HdWBvbSxGnIXSOA/Untitled?node-id=0-1&t=fzLYqizRUc6nplVl-1)
