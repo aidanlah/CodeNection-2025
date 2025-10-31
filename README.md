@@ -2,6 +2,7 @@
 Track: Campus Management 
 
 Problem statement: 
+
 Current safety infrastructure often lacks comprehensive coverage, real-time responsiveness, and accessibility features that address the diverse needs of the campus community, leaving gaps in protection and support.
 
 
@@ -35,11 +36,11 @@ Storage: Firestore + AsyncStorage
 
 ## 🔑 Core features
 
-SOS Button: Instantly alert your emergency contacts with your live location
+- Hazard Reporting & Map View: Submit and view nearby hazards in real-time.
 
-Hazard Reporting & Map View: Submit and view nearby hazards in real-time.
+- Walk With Me: Match with a trusted buddy to walk with you
 
-Walk With Me: Match with a trusted buddy to walk with you
+- SOS Button: Instantly alert your emergency contacts with your live location
 
 ### ⚠️ Hazard Reporting
 
@@ -52,19 +53,18 @@ Features:
 - Severity levels with color-coded urgency
 - Description field with validation (10–1000 characters)
 - Firebase Firestore integration for secure storage
-- Initial upvote from reporter; others can vote via `toggleUpvote()`
+- Initial upvote from reporter; others can upvote
 
 UX Highlights:
 - Responsive design with `KeyboardAvoidingView`
-- Real-time feedback via `ActivityIndicator`
 - Clear error messages for permission, validation, and submission issues
 - Cancel button to safely exit the flow
 
 Hazards are stored in the `hazardReports` collection with metadata including location (`GeoPoint`), severity, timestamp, and reporter ID.
 
-#### 🗺️ Hazard Map
+### 🗺️ Hazard Map
 
-The `map.tsx` screen displays a live map of reported hazards using data from Firestore. It includes:
+The `map` page displays a live map of reported hazards using data from Firestore. It includes:
 
 - **User Location**: Automatically centers on current location or fallback
 - **Hazard Markers**: Color-coded pins based on severity
@@ -85,29 +85,14 @@ Quick access to emergency types:
 
 Designed for rapid interaction and future alert integration.
 
-#### Voice Message Screen
-
-🎙️ Emergency Voice Session
-The Emergency Voice Session is a real-time support feature designed for high-stress situations. When a user triggers an SOS alert, this screen activates voice recording, location sharing, and security notification — all while providing calming visual feedback and clear instructions.
-
-🔧 Core Capabilities
-
--Auto-started emergency session with simulated backend connection
--Press-and-hold mic button to record voice messages
--Press-and-hold mic button with animated waveform
--Location sharing confirmation
-
 ### 🧍‍♂️ Buddy Up System
 
 The `buddyUp` page allows users to plan a safe walk by entering a starting location and destination. It supports:
 
 -Starting location and destination input
--Swap and current location options
--Safety features like real-time tracking, buddy sync, and hazard alerts
+-Safety features like real-time tracking and hazard alerts
 
-This screen uses a reusable `LocationInput` component and integrates with future map or tracking logic. It’s designed for clarity, speed, and safety.
-
-#### 📋 Request Detail Screen
+### 📋 Request Detail Screen
 
 Displays walk request info and volunteer decision flow.
 
@@ -117,9 +102,9 @@ Displays walk request info and volunteer decision flow.
 - Volunteer guidelines for respectful and safe conduct
 - Accept/Decline buttons with confirmation and navigation logic
 
-Accepting a request leads to the `OutfitPromptScreen`
+Accepting a request leads to the `OutfitPrompt` screen
 
-#### 👕 Outfit Prompt Screen
+### 👕 Outfit Prompt Screen
 
 After accepting a buddy request, volunteers are prompted to provide:
 - **Outfit Description**: Helps requesters identify them visually
@@ -132,7 +117,7 @@ This step enhances trust and clarity in the buddy matching process.
 ### 👤 Profile & Volunteer Management
 Manage emergency contacts and opt into the volunteer program.
  
-Volunteer Sign-Up (VolunteerSignUpForm.tsx)
+### Volunteer Sign-Up
 Allows users to become campus safety volunteers.
 
 Features:
